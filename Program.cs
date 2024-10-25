@@ -8,6 +8,8 @@ namespace JeffJamGame
     {
         static void Main(string[] args)
         {
+            using (MainGame mg = new MainGame())
+                mg.Run();
         }
     }
 }
