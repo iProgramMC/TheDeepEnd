@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define DRAW_MINIMAP
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -32,7 +34,7 @@ namespace JeffJamGame
         Matrix translateMatrix;
         Random random;
         Texture2D blankTexture;
-        Texture2D tilesTex, actorsTex;
+        Texture2D tilesTex, actorsTex, gameOverBgTex;
         SpriteFont font;
 
         public const int canvasWidth = 256;
@@ -43,6 +45,9 @@ namespace JeffJamGame
         public const int levelWidth = canvasWidth / tileSize;
         public const int levelHeight = canvasHeight / tileSize;
         public const int cameraScrollAheadLimit = canvasHeight / 2;
+        public const float fadeOutTime = 0.5f;
+        public const float fadeInTime = 0.5f;
+        public const float deathTime = 1.0f;
 
         public const Keys jumpKey = Keys.Space;
         public const Keys leftKey = Keys.Left;
@@ -50,15 +55,19 @@ namespace JeffJamGame
 
         float gameScale = 1f;
         float spacePressedTimer = 0f;
+        float deathTimer = 0f; // time until the game over screen shows up
+        float fadeOutTimer = 0f; // fade out
+        float fadeInTimer = 0f; // fade in
         int cameraY = 0;
 
-        Level level = new Level();
+        Level level;
         List<Actor> actors = new List<Actor>();
 
         KeyboardState keyboardState, prevKeyboardState;
-        
+
         public MainGame()
         {
+            level = new Level(this);
             random = new Random();
 
             graphics = new GraphicsDeviceManager(this);
@@ -87,23 +96,43 @@ namespace JeffJamGame
 
             tilesTex = Hax.LoadTexture2D(GraphicsDevice, "assets/tiles.png");
             actorsTex = Hax.LoadTexture2D(GraphicsDevice, "assets/actors.png");
+            gameOverBgTex = Hax.LoadTexture2D(GraphicsDevice, "assets/gameover.png");
 
             font = Content.Load<SpriteFont>("font");
+
+            ResetEverything();
+        }
+
+        void ResetEverything()
+        {
+            actors.Clear();
+            cameraY = 0;
+            prefabY = 0;
+            prefabIndex = -1;
+            currentPrefab = default;
+            fadeInTimer = fadeInTime;
+            fadeOutTimer = 0;
+            deathTimer = 0;
 
             for (int y = 0; y < levelHeight * 2; y++)
                 GenerateRow(y);
 
-            // add a player. for fun
             actors.Add(new Player(level, new Vector2(16, 16)));
-
         }
 
-        int prefabY = LevelPrefabs.prefabHeight, prefabIndex = -1;
-        string currentPrefab = "";
+        public void StartDeathSequence()
+        {
+            deathTimer = deathTime;
+        }
+
+        int prefabY, prefabIndex;
+        Prefab currentPrefab;
+
+        public int CameraY { get => cameraY; }
 
         void GenerateRow(int rowToGenerate)
         {
-            if (prefabY == LevelPrefabs.prefabHeight)
+            if (prefabY == currentPrefab.height)
             {
                 // shit, we need to choose.
                 currentPrefab = LevelPrefabs.GetRandomPrefab(random, ref prefabIndex);
@@ -162,11 +191,40 @@ namespace JeffJamGame
             prevKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
 
-            if (keyboardState.IsKeyDown(Keys.Up))
-                cameraY--; // camera won't be up-scrollable soon!
-
             //if (keyboardState.IsKeyDown(Keys.Down))
             //    ScrollDown(4);
+
+            if (deathTimer > 0)
+            {
+                deathTimer -= Hax.Elapsed(gameTime);
+
+                if (deathTimer <= 0)
+                {
+                    deathTimer = 0;
+                    // show the game over screen
+                    fadeOutTimer = fadeOutTime;
+                }
+            }
+            
+            if (fadeOutTimer > 0)
+            {
+                fadeOutTimer -= Hax.Elapsed(gameTime);
+
+                if (fadeOutTimer <= 0)
+                {
+                    fadeOutTimer = 0;
+                    ResetEverything();
+                    return;
+                }
+            }
+            
+            if (fadeInTimer > 0)
+            {
+                fadeInTimer -= Hax.Elapsed(gameTime);
+
+                if (fadeInTimer <= 0)
+                    fadeInTimer = 0;
+            }
 
             Player plr = null;
             foreach (var actor in actors)
@@ -271,6 +329,14 @@ namespace JeffJamGame
             DrawLevel();
             DrawActors();
 
+            // note: these timers are DECREASING
+            float alpha  = fadeOutTimer == 0 ? 0.0f : Hax.Lerp(0.0f, 1.0f, 1.0f - (fadeOutTimer / fadeOutTime));
+            float alpha2 = fadeInTimer  == 0 ? 0.0f : Hax.Lerp(0.0f, 1.0f, fadeInTimer / fadeInTime);
+            alpha = Math.Max(alpha, alpha2);
+
+            if (alpha > 0.01f)
+                spriteBatch.Draw(blankTexture, new Rectangle(0, 0, canvasWidth, canvasHeight), Color.FromNonPremultiplied(0, 0, 0, (int)(255 * alpha)));
+
             spriteBatch.End();
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null, translateMatrix);
@@ -285,9 +351,10 @@ namespace JeffJamGame
                 }
             }
 
-            if (!(plr is null))
-                spriteBatch.DrawString(font, $"yo waddup {plr.position.Y}", new Vector2(0, 0), Color.White, 0.0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0.0f);
+            //if (!(plr is null))
+            //    spriteBatch.DrawString(font, $"yo waddup {plr.position.Y}", new Vector2(0, 0), Color.White, 0.0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0.0f);
 
+#if DRAW_MINIMAP
             const int tw = 8;
             spriteBatch.Draw(blankTexture, new Rectangle(0, 0, levelWidth * tw, levelHeight * tw * 2), Color.FromNonPremultiplied(10, 10, 10, 200));
             for (int y = 0; y < levelHeight * 2; y++)
@@ -303,7 +370,7 @@ namespace JeffJamGame
             {
                 spriteBatch.Draw(blankTexture, new Rectangle((int)(plr.position.X * tw / tileSize), (int)((plr.position.Y % (tileSize * levelHeight * 2)) * tw / tileSize), tw, tw), Color.Red);
             }
-
+#endif
 
             spriteBatch.End();
         }

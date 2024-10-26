@@ -26,6 +26,15 @@ namespace JeffJamGame
         {
         }
 
+        void Die()
+        {
+            level.mainGame.StartDeathSequence();
+
+            // add a corpse actor in our place
+
+            deleted = true;
+        }
+
         void ProcessHorizontalInputs(MainGame mg, GameTime gameTime)
         {
             float moveX = mg.GetMoveX();
@@ -102,12 +111,11 @@ namespace JeffJamGame
                 ti.collisionType == eCollisionType.JumpThrough)
                 return false;
 
-            // TODO
-            //if (ti.collisionType == eCollisionType.Deadly)
-            //{
-            //    Die();
-            //    return true;
-            //}
+            if (ti.collisionType == eCollisionType.Deadly)
+            {
+                Die();
+                return true;
+            }
 
             velocity.X = 0;
             return false;
@@ -121,12 +129,11 @@ namespace JeffJamGame
                 ti.collisionType == eCollisionType.JumpThrough)
                 return false;
 
-            // TODO
-            //if (ti.collisionType == eCollisionType.Deadly)
-            //{
-            //    Die();
-            //    return true;
-            //}
+            if (ti.collisionType == eCollisionType.Deadly)
+            {
+                Die();
+                return true;
+            }
 
             if (velocity.Y < 0)
                 velocity.Y = 0;
@@ -154,9 +161,12 @@ namespace JeffJamGame
             float yToMove = (float) Math.Floor(subPixelMemory.Y + velocity.Y * Hax.Elapsed(gt));
             if (yToMove == 0f && isGrounded)
                 yToMove = 1f;
+
+            int newY = Math.Max((int)(position.Y + yToMove), level.mainGame.CameraY);
+
             CheckTilesInRect(ref tileCollisions, new Rectangle(
                 (int) position.X,
-                (int)(position.Y + yToMove),
+                (int) newY,
                 (int) hitBoxSize.X,
                 (int) hitBoxSize.Y
             ));

@@ -36,8 +36,8 @@ namespace JeffJamGame
         {
             int x1 = (int) Math.Floor((float)rect.X / tileSize);
             int y1 = (int) Math.Floor((float)rect.Y / tileSize);
-            int x2 = (int) Math.Ceiling((float)(rect.X + rect.Width) / tileSize);
-            int y2 = (int) Math.Ceiling((float)(rect.Y + rect.Height) / tileSize);
+            int x2 = (int) Math.Ceiling((float)(rect.X + rect.Width - 1) / tileSize);
+            int y2 = (int) Math.Ceiling((float)(rect.Y + rect.Height - 1) / tileSize);
 
             tileCollisions.Clear();
 
@@ -56,8 +56,8 @@ namespace JeffJamGame
             Rectangle rect = new Rectangle(
                 (int) actorPosition.X,
                 (int) actorPosition.Y,
-                (int) hitBoxSize.X - 1,
-                (int) hitBoxSize.Y - 1
+                (int) hitBoxSize.X,
+                (int) hitBoxSize.Y
             );
             CheckTilesInRect(ref tileCollisions, rect);
         }
@@ -109,6 +109,9 @@ namespace JeffJamGame
                 {
                     Vector2 newPosition = position;
                     newPosition.Y += moveUnit;
+
+                    if ((int) newPosition.Y <= level.mainGame.CameraY)
+                        break;
 
                     CheckOverlappedTiles(ref tileCollisions, newPosition);
 

@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace JeffJamGame
 {
+    public struct Prefab
+    {
+        public string data;
+        public int height;
+    }
+
     // LevelWidth X 12 prefabs of level.
     public class LevelPrefabs
     {
@@ -16,46 +22,18 @@ namespace JeffJamGame
             "#..............#" +
             "##########.....#" +
             "#..............#" +
-            "#T...T#>..T.^^^#" +
-            "#..^..#^^^^#####" +
-            "#.....######...#" +
+            "#.T#T.##..T.^^^#" +
+            "#.<#>..#^^^^####" +
+            "#..#...#####...#" +
             "#..............#" +
-            "#.TT..T####T...#" +
-            "#^^^^^##v......#" +
-            "#######....^^..#" +
+            "#TT..^T####T...#" +
+            "#^^^^###v......#" +
+            "#######......^^#" +
             "######....######";
-        //public const string Prefab2 =
-        //    "################" +
-        //    "################" +
-        //    "################" +
-        //    "################" +
-        //    "################" +
-        //    "################" +
-        //    "################" +
-        //    "################" +
-        //    "################" +
-        //    "################" +
-        //    "################" +
-        //    "################";
-        //public const string Prefab3 =
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^" +
-        //    "^^^^^^^^^^^^^^^^";
 
-        public static string[] Prefabs = new string[]
+        public static Prefab[] Prefabs = new Prefab[]
         {
-            Prefab1,
-            //Prefab2,
-            //Prefab3,
+            new Prefab { data = Prefab1, height = 12 },
         };
 
         public static eTileType CharToTileType(char chr)
@@ -73,7 +51,7 @@ namespace JeffJamGame
             }
         }
 
-        public static string GetRandomPrefab(Random r, ref int exclude)
+        public static Prefab GetRandomPrefab(Random r, ref int exclude)
         {
             int chosen;
             do {

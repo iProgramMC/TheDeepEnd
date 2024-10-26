@@ -11,11 +11,14 @@ namespace JeffJamGame
     {
         public const int levelWidth = MainGame.levelWidth;
         public const int levelHeight = MainGame.levelHeight;
+
         // access: tiles[X, Y]
         public eTileType[,] tiles = new eTileType[MainGame.levelWidth, MainGame.levelHeight * 2];
+        public readonly MainGame mainGame;
 
-        public Level()
+        public Level(MainGame mg)
         {
+            mainGame = mg;
         }
 
         public void PlacePrefab(int y, string prefab)
@@ -31,10 +34,10 @@ namespace JeffJamGame
             }
         }
 
-        public void PlacePrefabSlice(int y, int ySliceOfPrefab, string prefab)
+        public void PlacePrefabSlice(int y, int ySliceOfPrefab, Prefab prefab)
         {
             for (int xo = 0; xo < levelWidth; xo++)
-                SetTile(xo, y, LevelPrefabs.CharToTileType(prefab[ySliceOfPrefab * levelWidth + xo]));
+                SetTile(xo, y, LevelPrefabs.CharToTileType(prefab.data[ySliceOfPrefab * levelWidth + xo]));
         }
 
         public void DrawBorder(int ix, int iy, int width, int height, eTileType tileType)

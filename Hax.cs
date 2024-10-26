@@ -23,6 +23,18 @@ namespace JeffJamGame
             return (float) gt.ElapsedGameTime.TotalSeconds;
         }
 
+        public static float UnboundedLerp(float a, float b, float perc)
+        {
+            return a + (b - a) * perc;
+        }
+
+        public static float Lerp(float a, float b, float perc)
+        {
+            if (perc >= 1.0f) return b;
+            if (perc <= 0.0f) return a;
+            return a + (b - a) * perc;
+        }
+
         public static void SetFloatWithTarget(ref float outDest, float target, float amount)
         {
             if (outDest > target)
