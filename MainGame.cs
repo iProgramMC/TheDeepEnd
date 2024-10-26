@@ -179,6 +179,11 @@ namespace JeffJamGame
 
         public void ConsumeJumpBuffer() { spacePressedTimer = 0f; }
 
+        public void AddActor(Actor actor)
+        {
+            actors.Add(actor);
+        }
+
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
         /// param "gameTime" Provides a snapshot of timing values.
@@ -227,8 +232,9 @@ namespace JeffJamGame
             }
 
             Player plr = null;
-            foreach (var actor in actors)
+            for (int i = 0; i < actors.Count; i++)
             {
+                Actor actor = actors[i];
                 actor.Update(this, gameTime);
                 if (actor is Player)
                     plr = actor as Player;

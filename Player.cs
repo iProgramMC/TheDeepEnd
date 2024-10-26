@@ -29,9 +29,7 @@ namespace JeffJamGame
         void Die()
         {
             level.mainGame.StartDeathSequence();
-
-            // add a corpse actor in our place
-
+            level.mainGame.AddActor(new PlayerCorpse(level, this));
             deleted = true;
         }
 
