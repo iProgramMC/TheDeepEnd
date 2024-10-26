@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Configuration;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,9 +19,11 @@ namespace JeffJamGame
         public Level level;
         public bool facingLeft = false;
         public bool deleted = false; // marked for deletion
+        public float jumpForgivenessTimer = 0f;
 
         public const int jumpThroughSize = 3;
         public const int tileSize = MainGame.tileSize;
+        public const float jumpForgivenessTime = 0.1f;
 
         public Actor(Level level, Vector2 hitBoxSize, Vector2 position)
         {
@@ -29,15 +32,8 @@ namespace JeffJamGame
             this.hitBoxSize = hitBoxSize;
         }
 
-        public void CheckOverlappedTiles(ref List<Point> tileCollisions, Vector2 actorPosition)
+        public void CheckTilesInRect(ref List<Point> tileCollisions, Rectangle rect)
         {
-            Rectangle rect = new Rectangle(
-                (int) actorPosition.X,
-                (int) actorPosition.Y,
-                (int) hitBoxSize.X - 1,
-                (int) hitBoxSize.Y - 1
-            );
-
             int x1 = (int) Math.Floor((float)rect.X / tileSize);
             int y1 = (int) Math.Floor((float)rect.Y / tileSize);
             int x2 = (int) Math.Ceiling((float)(rect.X + rect.Width) / tileSize);
@@ -55,8 +51,18 @@ namespace JeffJamGame
                 }
             }
         }
+        public void CheckOverlappedTiles(ref List<Point> tileCollisions, Vector2 actorPosition)
+        {
+            Rectangle rect = new Rectangle(
+                (int) actorPosition.X,
+                (int) actorPosition.Y,
+                (int) hitBoxSize.X - 1,
+                (int) hitBoxSize.Y - 1
+            );
+            CheckTilesInRect(ref tileCollisions, rect);
+        }
 
-        public bool CollideX(Point tilePosition, Vector2 actorPosition)
+        public bool CollideX(Point tilePosition, Vector2 actorPosition, int moveUnit)
         {
             eTileType tt = level.GetTile(tilePosition.X, tilePosition.Y);
             TileInfo ti = TileManager.GetTileInfo(tt);
@@ -67,7 +73,7 @@ namespace JeffJamGame
             return true;
         }
 
-        public bool CollideY(Point tilePosition, Vector2 actorPosition)
+        public bool CollideY(Point tilePosition, Vector2 actorPosition, int moveUnit)
         {
             eTileType tt = level.GetTile(tilePosition.X, tilePosition.Y);
             TileInfo ti = TileManager.GetTileInfo(tt);
@@ -76,7 +82,7 @@ namespace JeffJamGame
                 return false;
 
             if (ti.collisionType == eCollisionType.JumpThrough)
-                return actorPosition.Y + hitBoxSize.Y < tilePosition.Y * tileSize + jumpThroughSize;
+                return moveUnit > 0 && (actorPosition.Y + hitBoxSize.Y < tilePosition.Y * tileSize + jumpThroughSize);
 
             return true;
         }
@@ -109,7 +115,7 @@ namespace JeffJamGame
                     collided = false;
                     for (int i = 0; i < tileCollisions.Count; i++)
                     {
-                        if (CollideY(tileCollisions[i], newPosition))
+                        if (CollideY(tileCollisions[i], newPosition, moveUnit))
                         {
                             collided = true;
                             break;
@@ -149,7 +155,7 @@ namespace JeffJamGame
                     collided = false;
                     for (int i = 0; i < tileCollisions.Count; i++)
                     {
-                        if (CollideX(tileCollisions[i], newPosition))
+                        if (CollideX(tileCollisions[i], newPosition, moveUnit))
                         {
                             collided = true;
                             break;
@@ -165,10 +171,46 @@ namespace JeffJamGame
             }
         }
 
+        void ProcessFloor()
+        {
+            if (!isGrounded)
+                return;
+
+            Vector2 newPosition = position + new Vector2(0, 1);
+
+            List<Point> tileCollisions = new List<Point>();
+            CheckOverlappedTiles(ref tileCollisions, newPosition);
+
+            bool collided = false;
+            for (int i = 0; i < tileCollisions.Count; i++)
+            {
+                if (CollideY(tileCollisions[i], newPosition, 1))
+                {
+                    collided = true;
+                    break;
+                }
+            }
+
+            if (!collided)
+            {
+                // no longer on the ground :(
+                jumpForgivenessTimer = jumpForgivenessTime;
+                isGrounded = false;
+            }
+        }
+
         // Updates the actor.
         public virtual void Update(MainGame mg, GameTime gameTime)
         {
             Move(velocity * Hax.Elapsed(gameTime));
+            ProcessFloor();
+
+            if (jumpForgivenessTimer > 0)
+            {
+                jumpForgivenessTimer -= Hax.Elapsed(gameTime);
+                if (jumpForgivenessTimer < 0)
+                    jumpForgivenessTimer = 0;
+            }
         }
 
         // Gets the frame X and Y position in the actors.png sprite sheet.

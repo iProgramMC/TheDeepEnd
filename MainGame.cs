@@ -30,7 +30,7 @@ namespace JeffJamGame
         SpriteBatch spriteBatch;
         Matrix scaleMatrix;
         Matrix translateMatrix;
-
+        Random random;
         Texture2D blankTexture;
         Texture2D tilesTex, actorsTex;
         SpriteFont font;
@@ -42,6 +42,7 @@ namespace JeffJamGame
 
         public const int levelWidth = canvasWidth / tileSize;
         public const int levelHeight = canvasHeight / tileSize;
+        public const int cameraScrollAheadLimit = canvasHeight / 2;
 
         public const Keys jumpKey = Keys.Space;
         public const Keys leftKey = Keys.Left;
@@ -58,6 +59,8 @@ namespace JeffJamGame
         
         public MainGame()
         {
+            random = new Random();
+
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "assets";
             Window.AllowUserResizing = true;
@@ -87,20 +90,29 @@ namespace JeffJamGame
 
             font = Content.Load<SpriteFont>("font");
 
-            RegenerateScreen(0);
-            RegenerateScreen(1);
+            for (int y = 0; y < levelHeight * 2; y++)
+                GenerateRow(y);
 
             // add a player. for fun
             actors.Add(new Player(level, new Vector2(16, 16)));
+
         }
 
-        int crap = 0;
+        int prefabY = LevelPrefabs.prefabHeight, prefabIndex = -1;
+        string currentPrefab = "";
 
-        void RegenerateScreen(int screenToRegen)
+        void GenerateRow(int rowToGenerate)
         {
-            eTileType tileType = (eTileType)(1 + crap % 6);
-            level.DrawBorder(0, screenToRegen * levelHeight, levelWidth, levelHeight, tileType);
-            crap++;
+            if (prefabY == LevelPrefabs.prefabHeight)
+            {
+                // shit, we need to choose.
+                currentPrefab = LevelPrefabs.GetRandomPrefab(random, ref prefabIndex);
+                prefabY = 0;
+            }
+
+            // then advance the current prefab
+            level.PlacePrefabSlice(rowToGenerate, prefabY, currentPrefab);
+            prefabY++;
         }
 
         void ScrollDown(int amount)
@@ -108,12 +120,12 @@ namespace JeffJamGame
             int oldCameraY = cameraY;
             cameraY += amount;
 
-            // if crossed a screen boundary, then regenerate the last screen
-            if (oldCameraY / canvasHeight != cameraY / canvasHeight)
+            // if crossed a row boundary, then generate the next row
+            if (oldCameraY / tileSize != cameraY / tileSize)
             {
-                int screenToRegen = (oldCameraY / canvasHeight) % 2;
+                int rowToRegen = (oldCameraY / tileSize) % (levelHeight * 2);
 
-                RegenerateScreen(screenToRegen);
+                GenerateRow(rowToRegen);
             }
         }
 
@@ -129,7 +141,11 @@ namespace JeffJamGame
 
         public bool JumpPressed()
         {
-            return keyboardState.IsKeyDown(jumpKey) || spacePressedTimer > 0;
+            return (keyboardState.IsKeyDown(jumpKey) && prevKeyboardState.IsKeyUp(jumpKey)) || spacePressedTimer > 0;
+        }
+        public bool JumpHeld()
+        {
+            return keyboardState.IsKeyDown(jumpKey);
         }
 
         public void ConsumeJumpBuffer() { spacePressedTimer = 0f; }
@@ -146,14 +162,27 @@ namespace JeffJamGame
             prevKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
 
-            //if (keyboardState.IsKeyDown(Keys.Up))
-            //    cameraY--; // camera won't be up-scrollable soon!
-            //
+            if (keyboardState.IsKeyDown(Keys.Up))
+                cameraY--; // camera won't be up-scrollable soon!
+
             //if (keyboardState.IsKeyDown(Keys.Down))
             //    ScrollDown(4);
 
+            Player plr = null;
             foreach (var actor in actors)
+            {
                 actor.Update(this, gameTime);
+                if (actor is Player)
+                    plr = actor as Player;
+            }
+
+            if (!(plr is null))
+            {
+                if (plr.position.Y - cameraY > cameraScrollAheadLimit)
+                {
+                    ScrollDown((int)(plr.position.Y - cameraY - cameraScrollAheadLimit));
+                }
+            }
 
             for (int i = 0; i < actors.Count; i++)
             {
@@ -207,7 +236,7 @@ namespace JeffJamGame
         void DrawActor(Actor actor)
         {
             Point frame = actor.GetFrameInActors();
-            Vector2 vec = actor.position - new Vector2((tileSize - actor.hitBoxSize.X) / 2, tileSize - actor.hitBoxSize.Y);
+            Vector2 vec = actor.position - new Vector2((tileSize - actor.hitBoxSize.X) / 2, tileSize - actor.hitBoxSize.Y + cameraY);
             spriteBatch.Draw(
                 actorsTex,
                 vec,
@@ -257,7 +286,24 @@ namespace JeffJamGame
             }
 
             if (!(plr is null))
-                spriteBatch.DrawString(font, $"yo waddup {plr.velocity.Y}", new Vector2(0, 0), Color.White, 0.0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0.0f);
+                spriteBatch.DrawString(font, $"yo waddup {plr.position.Y}", new Vector2(0, 0), Color.White, 0.0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0.0f);
+
+            const int tw = 8;
+            spriteBatch.Draw(blankTexture, new Rectangle(0, 0, levelWidth * tw, levelHeight * tw * 2), Color.FromNonPremultiplied(10, 10, 10, 200));
+            for (int y = 0; y < levelHeight * 2; y++)
+            {
+                for (int x = 0; x < levelWidth; x++)
+                {
+                    if (level.GetTile(x, y) != eTileType.None)
+                        spriteBatch.Draw(blankTexture, new Rectangle(x * tw, y * tw, tw, tw), Color.White);
+                }
+            }
+
+            if (!(plr is null))
+            {
+                spriteBatch.Draw(blankTexture, new Rectangle((int)(plr.position.X * tw / tileSize), (int)((plr.position.Y % (tileSize * levelHeight * 2)) * tw / tileSize), tw, tw), Color.Red);
+            }
+
 
             spriteBatch.End();
         }

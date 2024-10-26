@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,11 +9,32 @@ namespace JeffJamGame
 {
     public class Level
     {
+        public const int levelWidth = MainGame.levelWidth;
+        public const int levelHeight = MainGame.levelHeight;
         // access: tiles[X, Y]
         public eTileType[,] tiles = new eTileType[MainGame.levelWidth, MainGame.levelHeight * 2];
 
         public Level()
         {
+        }
+
+        public void PlacePrefab(int y, string prefab)
+        {
+            int height = prefab.Length / levelWidth;
+            Debug.Assert(prefab.Length % levelWidth == 0);
+
+            int i = 0;
+            for (int yo = 0; yo < height; yo++)
+            {
+                for (int xo = 0; xo < levelWidth; xo++)
+                    SetTile(xo, y + yo, LevelPrefabs.CharToTileType(prefab[i++]));
+            }
+        }
+
+        public void PlacePrefabSlice(int y, int ySliceOfPrefab, string prefab)
+        {
+            for (int xo = 0; xo < levelWidth; xo++)
+                SetTile(xo, y, LevelPrefabs.CharToTileType(prefab[ySliceOfPrefab * levelWidth + xo]));
         }
 
         public void DrawBorder(int ix, int iy, int width, int height, eTileType tileType)
