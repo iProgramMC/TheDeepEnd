@@ -36,6 +36,8 @@ namespace JeffJamGame
         Random random;
         Texture2D blankTexture;
         Texture2D tilesTex, actorsTex, gameOverBgTex;
+        Texture2D depth0Layer0Tex, depth0Layer1Tex;
+        Texture2D depth1TopTex, depth1Layer0Tex, depth1Layer1Tex, depth1Layer2Tex, depth2TransTex;
         SpriteFont font;
         
         public SoundEffect sfx_damage, sfx_jump, sfx_land, sfx_peline;
@@ -64,9 +66,10 @@ namespace JeffJamGame
         int cameraY = 0;
 
         bool isGameOverScreenShown = false;
+        bool isTitleScreenShown = false;
         float gameOverScreenPos = 0f;
         float gameOverScreenVel = 0f;
-        float gameOverTimeActive = 0f;
+        float somethingHue = 0f;
 
         // PLAYER SCORE
         int maxPlayerY = 0;
@@ -100,6 +103,8 @@ namespace JeffJamGame
 
             IsMouseVisible = true;
             Window.AllowUserResizing = true;
+
+            isTitleScreenShown = true;
         }
 
         protected override void LoadContent()
@@ -112,6 +117,14 @@ namespace JeffJamGame
             tilesTex = Hax.LoadTexture2D(GraphicsDevice, "assets/tiles.png");
             actorsTex = Hax.LoadTexture2D(GraphicsDevice, "assets/actors.png");
             gameOverBgTex = Hax.LoadTexture2D(GraphicsDevice, "assets/gameover.png");
+
+            depth0Layer0Tex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_0_layer_0.png");
+            depth0Layer1Tex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_0_layer_1.png");
+            depth1TopTex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_1_top.png");
+            depth1Layer0Tex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_1_layer_0.png");
+            depth1Layer1Tex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_1_layer_1.png");
+            depth1Layer2Tex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_1_layer_2.png");
+            depth2TransTex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_2_transition.png");
 
             font = Content.Load<SpriteFont>("font");
 
@@ -135,6 +148,7 @@ namespace JeffJamGame
             deathTimer = 0;
             isGameOverScreenShown = false;
             maxPlayerY = 0;
+            isTitleScreenShown = false;
 
             int spawnPointX = -1, spawnPointY = -1;
 
@@ -230,18 +244,8 @@ namespace JeffJamGame
             actors.Add(actor);
         }
 
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// param "gameTime" Provides a snapshot of timing values.
-        protected override void Update(GameTime gameTime)
+        void UpdateGame(GameTime gameTime)
         {
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
-
-            prevKeyboardState = keyboardState;
-            keyboardState = Keyboard.GetState();
-
             if (Hax.Timer(ref deathTimer, gameTime) == eTimerState.Finished)
             {
                 // show the game over screen
@@ -251,20 +255,8 @@ namespace JeffJamGame
                 gameOverScreenVel = 400;
             }
 
-            if (Hax.Timer(ref fadeOutTimer, gameTime) == eTimerState.Finished)
-            {
-                ResetEverything();
-                return;
-            }
-
-            Hax.Timer(ref fadeInTimer, gameTime);
-
             if (isGameOverScreenShown)
             {
-                gameOverTimeActive += Hax.Elapsed(gameTime) * 50;
-                while (gameOverTimeActive > 360)
-                    gameOverTimeActive -= 360;
-
                 // make it fall
                 gameOverScreenPos += gameOverScreenVel * Hax.Elapsed(gameTime);
                 Hax.SetFloatWithTarget(ref gameOverScreenVel, 1000f, Hax.Elapsed(gameTime) * 500);
@@ -319,6 +311,44 @@ namespace JeffJamGame
                 if (spacePressedTimer < 0)
                     spacePressedTimer = 0;
             }
+        }
+
+        void UpdateTitle(GameTime gameTime)
+        {
+            if (keyboardState.IsKeyDown(Keys.Enter) && !prevKeyboardState.IsKeyDown(Keys.Enter) && fadeOutTimer == 0)
+            {
+                fadeOutTimer = fadeOutTime;
+            }
+        }
+
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// param "gameTime" Provides a snapshot of timing values.
+        protected override void Update(GameTime gameTime)
+        {
+            // Allows the game to exit
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+                this.Exit();
+
+            prevKeyboardState = keyboardState;
+            keyboardState = Keyboard.GetState();
+
+            if (Hax.Timer(ref fadeOutTimer, gameTime) == eTimerState.Finished)
+            {
+                ResetEverything();
+                return;
+            }
+
+            Hax.Timer(ref fadeInTimer, gameTime);
+
+            if (isTitleScreenShown)
+                UpdateTitle(gameTime);
+            else
+                UpdateGame(gameTime);
+
+            somethingHue += Hax.Elapsed(gameTime) * 50;
+            while (somethingHue > 360)
+                somethingHue -= 360;
 
             gameScale = (float)GraphicsDevice.Viewport.Height / (float) canvasHeight;
             scaleMatrix = Matrix.CreateScale(gameScale);
@@ -410,7 +440,7 @@ namespace JeffJamGame
             spriteBatch.DrawString(font, scoreStr,       new Vector2(canvasWidth - 32 - scoreStrSize,     w+96),  Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
             spriteBatch.DrawString(font, highScoreStr,   new Vector2(canvasWidth - 32 - highScoreStrSize, w+128), Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
 
-            Color color = Hax.HSVToRGB(gameOverTimeActive, 1.0f, 1.0f);
+            Color color = Hax.HSVToRGB(somethingHue, 1.0f, 1.0f);
             spriteBatch.DrawString(font, pressEnterStr, new Vector2(canvasWidth / 2 - pressEnterStrSize / 2, w + 180), color, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
         }
 
@@ -425,11 +455,81 @@ namespace JeffJamGame
                 spriteBatch.Draw(blankTexture, new Rectangle(0, 0, canvasWidth, canvasHeight), Color.FromNonPremultiplied(0, 0, 0, (int)(255 * alpha)));
         }
 
+        void DrawTitle()
+        {
+            const float titleScale = 0.4f;
+            const float normalScale = 0.2f;
+
+            const string titleStr = "The Deep End";
+            const string pressEnterStr = "Press ENTER to begin!";
+
+            float titleStrSize = font.MeasureString(titleStr).X * titleScale;
+            float pressEnterStrSize = font.MeasureString(pressEnterStr).X * normalScale;
+
+            Color color = Hax.HSVToRGB(somethingHue, 1.0f, 1.0f);
+            spriteBatch.DrawString(font, titleStr, new Vector2(canvasWidth / 2 - titleStrSize / 2, 32), color, 0.0f, Vector2.Zero, titleScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, pressEnterStr, new Vector2(canvasWidth / 2 - pressEnterStrSize / 2, canvasHeight / 2), Color.White, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+        }
+
+        Color GetBGColor()
+        {
+            if (isTitleScreenShown)
+                return Color.Black;
+
+            return Color.FromNonPremultiplied(8, 12, 18, 255);
+        }
+
+        public const int level0Height = canvasHeight * 4;
+        public const int level1Height = 1024;
+        public const int level2Height = 576;
+
+        public readonly Color bgColor = Color.FromNonPremultiplied(128, 96, 96, 255);
+
+        void DrawDepth0Background(int yOffset, int lr)
+        {
+            if (lr == 0)
+                if (yOffset * 0.25f + 96 >= -128) 
+                    spriteBatch.Draw(depth0Layer0Tex, new Vector2(0, yOffset * 0.25f + 96), bgColor);
+
+            if (lr == 1) spriteBatch.Draw(depth0Layer1Tex, new Vector2(0, yOffset * 0.5f + 256), bgColor);
+        }
+
+        void DrawDepth1Background(int yOffset, int lr)
+        {
+            yOffset += level0Height;
+            if (lr == 0) spriteBatch.Draw(depth1Layer0Tex, new Vector2(0, yOffset * 0.125f), bgColor);
+            if (lr == 1) spriteBatch.Draw(depth1Layer1Tex, new Vector2(0, yOffset * 0.25f), bgColor);
+            if (lr == 2) spriteBatch.Draw(depth1Layer2Tex, new Vector2(0, yOffset * 0.5f), bgColor);
+            if (lr == 2) spriteBatch.Draw(depth1TopTex, new Vector2(0, yOffset * 0.5f - 128), bgColor);
+        }
+
+        void DrawDepth2Background(int yOffset)
+        {
+            yOffset += level0Height;
+            yOffset += level1Height;
+            if (yOffset < 0)
+                yOffset %= (192 * 2);
+            spriteBatch.Draw(depth2TransTex, new Vector2(0, yOffset * 0.5f), bgColor);
+            spriteBatch.Draw(depth2TransTex, new Vector2(0, yOffset * 0.5f + 192 * 1), bgColor);
+            spriteBatch.Draw(depth2TransTex, new Vector2(0, yOffset * 0.5f + 192 * 2), bgColor);
+        }
+
+        void DrawBackground()
+        {
+            DrawDepth1Background(-cameraY, 0);
+            DrawDepth1Background(-cameraY, 1);
+            DrawDepth0Background(-cameraY, 0);
+            DrawDepth0Background(-cameraY, 1);
+            DrawDepth1Background(-cameraY, 2);
+            DrawDepth0Background(-cameraY, 2);
+            DrawDepth2Background(-cameraY);
+        }
+
         /// This is called when the game should draw itself.
         /// param gameTime Provides a snapshot of timing values.
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);// FromNonPremultiplied(10, 10, 10, 255));
+            GraphicsDevice.Clear(GetBGColor());
 
             // POINT CLAMP, SCALED
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null, scaleMatrix * translateMatrix);
@@ -438,9 +538,13 @@ namespace JeffJamGame
             spriteBatch.Draw(blankTexture, new Rectangle(-1000, 0, 1000, canvasHeight), Color.Black);
             spriteBatch.Draw(blankTexture, new Rectangle(canvasWidth, 0, 1000, canvasHeight), Color.Black);
 
-            DrawLevel();
-            DrawActors();
-            if (isGameOverScreenShown) DrawGameOverScreenBG();
+            if (!isTitleScreenShown)
+            {
+                DrawBackground();
+                DrawLevel();
+                DrawActors();
+                if (isGameOverScreenShown) DrawGameOverScreenBG();
+            }
 
             spriteBatch.End();
 
@@ -450,47 +554,52 @@ namespace JeffJamGame
 
             if (isGameOverScreenShown)
                 DrawGameOverScreenText();
+            else if (isTitleScreenShown)
+                DrawTitle();
 
             DrawFades();
 
             spriteBatch.End();
 
 
-            // POINT CLAMP, NON SCALED
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null, translateMatrix);
-
-            Player plr = null;
-            foreach (var actor in actors)
+            if (!isTitleScreenShown)
             {
-                if (actor is Player)
-                {
-                    plr = actor as Player;
-                    break;
-                }
-            }
+                // POINT CLAMP, NON SCALED
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null, translateMatrix);
 
-            //if (!(plr is null))
-            //    spriteBatch.DrawString(font, $"yo waddup {plr.position.Y}", new Vector2(0, 0), Color.White, 0.0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0.0f);
+                Player plr = null;
+                foreach (var actor in actors)
+                {
+                    if (actor is Player)
+                    {
+                        plr = actor as Player;
+                        break;
+                    }
+                }
+
+                //if (!(plr is null))
+                //    spriteBatch.DrawString(font, $"yo waddup {plr.position.Y}", new Vector2(0, 0), Color.White, 0.0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0.0f);
 
 #if DRAW_MINIMAP
-            const int tw = 8;
-            spriteBatch.Draw(blankTexture, new Rectangle(0, 0, levelWidth * tw, levelHeight * tw * 2), Color.FromNonPremultiplied(10, 10, 10, 200));
-            for (int y = 0; y < levelHeight * 2; y++)
-            {
-                for (int x = 0; x < levelWidth; x++)
+                const int tw = 8;
+                spriteBatch.Draw(blankTexture, new Rectangle(0, 0, levelWidth * tw, levelHeight * tw * 2), Color.FromNonPremultiplied(10, 10, 10, 200));
+                for (int y = 0; y < levelHeight * 2; y++)
                 {
-                    if (level.GetTile(x, y) != eTileType.None)
-                        spriteBatch.Draw(blankTexture, new Rectangle(x * tw, y * tw, tw, tw), Color.White);
+                    for (int x = 0; x < levelWidth; x++)
+                    {
+                        if (level.GetTile(x, y) != eTileType.None)
+                            spriteBatch.Draw(blankTexture, new Rectangle(x * tw, y * tw, tw, tw), Color.White);
+                    }
                 }
-            }
 
-            if (!(plr is null))
-            {
-                spriteBatch.Draw(blankTexture, new Rectangle((int)(plr.position.X * tw / tileSize), (int)((plr.position.Y % (tileSize * levelHeight * 2)) * tw / tileSize), tw, tw), Color.Red);
-            }
+                if (!(plr is null))
+                {
+                    spriteBatch.Draw(blankTexture, new Rectangle((int)(plr.position.X * tw / tileSize), (int)((plr.position.Y % (tileSize * levelHeight * 2)) * tw / tileSize), tw, tw), Color.Red);
+                }
 #endif
 
-            spriteBatch.End();
+                spriteBatch.End();
+            }
         }
     }
 }
