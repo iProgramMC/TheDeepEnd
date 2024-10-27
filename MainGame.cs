@@ -38,6 +38,7 @@ namespace JeffJamGame
         Texture2D tilesTex, actorsTex, gameOverBgTex;
         Texture2D depth0Layer0Tex, depth0Layer1Tex;
         Texture2D depth1TopTex, depth1Layer0Tex, depth1Layer1Tex, depth1Layer2Tex, depth2TransTex;
+        Texture2D perlinNoiseTex;
         SpriteFont font;
         
         public SoundEffect sfx_damage, sfx_jump, sfx_land, sfx_peline;
@@ -70,6 +71,7 @@ namespace JeffJamGame
         float gameOverScreenPos = 0f;
         float gameOverScreenVel = 0f;
         float somethingHue = 0f;
+        float noiseOffs = 0f;
 
         // PLAYER SCORE
         int maxPlayerY = 0;
@@ -117,7 +119,7 @@ namespace JeffJamGame
             tilesTex = Hax.LoadTexture2D(GraphicsDevice, "assets/tiles.png");
             actorsTex = Hax.LoadTexture2D(GraphicsDevice, "assets/actors.png");
             gameOverBgTex = Hax.LoadTexture2D(GraphicsDevice, "assets/gameover.png");
-
+            perlinNoiseTex = Hax.LoadTexture2D(GraphicsDevice, "assets/overlay.png");
             depth0Layer0Tex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_0_layer_0.png");
             depth0Layer1Tex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_0_layer_1.png");
             depth1TopTex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_1_top.png");
@@ -246,6 +248,11 @@ namespace JeffJamGame
 
         void UpdateGame(GameTime gameTime)
         {
+            noiseOffs += Hax.Elapsed(gameTime) * 5;
+
+            if (noiseOffs > 512)
+                noiseOffs -= 512;
+
             if (Hax.Timer(ref deathTimer, gameTime) == eTimerState.Finished)
             {
                 // show the game over screen
@@ -543,11 +550,24 @@ namespace JeffJamGame
                 DrawBackground();
                 DrawLevel();
                 DrawActors();
-                if (isGameOverScreenShown) DrawGameOverScreenBG();
             }
 
             spriteBatch.End();
 
+            // LINEAR WRAP, SCALED, ADDITIVE
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, null, null, null, scaleMatrix * translateMatrix);
+            spriteBatch.Draw(
+                perlinNoiseTex,
+                new Vector2(-(noiseOffs % 1), -(noiseOffs % 1)),
+                new Rectangle((int)noiseOffs, (int)(noiseOffs + cameraY / 2) % 512, canvasWidth + 1, canvasHeight + 1),
+                Color.FromNonPremultiplied(255, 255, 255, 100)
+            );
+            spriteBatch.End();
+
+            // POINT CLAMP, SCALED
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null, scaleMatrix * translateMatrix);
+            if (isGameOverScreenShown) DrawGameOverScreenBG();
+            spriteBatch.End();
 
             // LINEAR CLAMP, SCALED
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, scaleMatrix * translateMatrix);
@@ -560,7 +580,6 @@ namespace JeffJamGame
             DrawFades();
 
             spriteBatch.End();
-
 
             if (!isTitleScreenShown)
             {
