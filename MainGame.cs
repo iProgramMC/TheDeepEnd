@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -36,6 +37,8 @@ namespace JeffJamGame
         Texture2D blankTexture;
         Texture2D tilesTex, actorsTex, gameOverBgTex;
         SpriteFont font;
+        
+        public SoundEffect sfx_damage, sfx_jump, sfx_land, sfx_peline;
 
         public const int canvasWidth = 256;
         public const int canvasHeight = 240;
@@ -106,6 +109,11 @@ namespace JeffJamGame
             gameOverBgTex = Hax.LoadTexture2D(GraphicsDevice, "assets/gameover.png");
 
             font = Content.Load<SpriteFont>("font");
+
+            sfx_damage = Hax.LoadSoundEffect("assets/damage.pcm");
+            sfx_jump = Hax.LoadSoundEffect("assets/jump.pcm");
+            sfx_land = Hax.LoadSoundEffect("assets/land.pcm");
+            sfx_peline = Hax.LoadSoundEffect("assets/paline.pcm");
 
             ResetEverything();
         }

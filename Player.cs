@@ -60,7 +60,9 @@ namespace JeffJamGame
             if (flickerTimer > 0)
                 // invincible for a bit
                 return;
-            
+
+            level.mainGame.sfx_damage.Play();
+
             health--;
 
             if (health <= 0)
@@ -99,6 +101,8 @@ namespace JeffJamGame
                 isGrounded = false;
                 velocity.Y = jumpSpeed;
                 jumpHoldTimer = jumpHoldTime;
+
+                mg.sfx_jump.Play();
             }
         }
 
@@ -159,6 +163,7 @@ namespace JeffJamGame
                 velocity.Y = springSpeed;
                 jumpHoldTimer = 0.0f;
                 level.SpecialEffect(tilePos, Level.springSpecialEffectTime);
+                level.mainGame.sfx_peline.Play();
                 return true;
             }
             else return false;
@@ -260,6 +265,7 @@ namespace JeffJamGame
 
         public override void Update(MainGame mg, GameTime gameTime)
         {
+            bool oldGrounded = isGrounded;
             HandleWalkAnimation(gameTime);
             ProcessHorizontalInputs(mg, gameTime);
             ProcessJumpKey(mg);
@@ -267,6 +273,9 @@ namespace JeffJamGame
             HandleGravity(mg, gameTime);
             HandleFacing(mg);
             base.Update(mg, gameTime);
+
+            if (isGrounded && !oldGrounded)
+                mg.sfx_land.Play();
 
             if (Hax.Timer(ref flickerTimer, gameTime) == eTimerState.Running)
                 flickerFrame++;

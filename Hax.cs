@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -16,6 +17,11 @@ namespace JeffJamGame
     }
     public class Hax
     {
+        public static SoundEffect LoadSoundEffect(string path, bool isStereo = false)
+        {
+            return new SoundEffect(File.ReadAllBytes(path), 44100, isStereo ? AudioChannels.Stereo : AudioChannels.Mono);
+        }
+
         public static Texture2D LoadTexture2D(GraphicsDevice gd, string an)
         {
             Stream stream = new FileStream(an, FileMode.Open);
