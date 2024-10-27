@@ -78,6 +78,10 @@ namespace TheDeepEnd
                         mainGame.AddActor(new Pumpkin(this, new Vector2(dx * tileSize + 4, entY + 8)));
                         break;
 
+                    case 'C':
+                        mainGame.AddActor(new Candy(this, new Vector2(dx * tileSize + 4, entY + 8)));
+                        break;
+
                     default:
                         chro = chr;
                         break;

@@ -9,6 +9,8 @@ namespace TheDeepEnd
 {
     public class BroomStickWearOff : Actor
     {
+        float timer = 5.0f;
+
         public BroomStickWearOff(Level level, Player player) :
             base(level, player.hitBoxSize, player.position)
         {
@@ -27,6 +29,9 @@ namespace TheDeepEnd
             );
             subPixelMemory -= toMove;
             position += toMove;
+
+            if (Hax.Timer(ref timer, gameTime) == eTimerState.Finished)
+                deleted = true;
 
             // gravity
             Hax.SetFloatWithTarget(ref velocity.Y, Player.maxFall * 0.5f, Hax.Elapsed(gameTime) * 0.5f * Player.gravity);

@@ -33,7 +33,6 @@ namespace TheDeepEnd
         SpriteBatch spriteBatch;
         Matrix scaleMatrix;
         Matrix translateMatrix;
-        Random random;
         Texture2D blankTexture;
         Texture2D tilesTex, actorsTex, gameOverBgTex;
         Texture2D depth0Layer0Tex, depth0Layer1Tex;
@@ -41,7 +40,8 @@ namespace TheDeepEnd
         Texture2D perlinNoiseTex;
         SpriteFont font;
         
-        public SoundEffect sfx_damage, sfx_jump, sfx_land, sfx_peline, sfx_upgrade;
+        public SoundEffect sfx_damage, sfx_jump, sfx_land, sfx_peline, sfx_upgrade, sfx_candy;
+        public Random random;
 
         public const int canvasWidth = 256;
         public const int canvasHeight = 240;
@@ -75,10 +75,18 @@ namespace TheDeepEnd
 
         // PLAYER SCORE
         int maxPlayerY = 0;
+        int candy = 0;
 
         // HIGH SCORE
         int highScore = 0;
+        int highCandy = 0;
         bool hasHighScore = false; // does this session have a high score?
+        bool hasHighCandy = false;
+
+        public void AddCandy(int cndy)
+        {
+            candy += cndy;
+        }
 
         Level level;
         List<Actor> actors = new List<Actor>();
@@ -139,6 +147,7 @@ namespace TheDeepEnd
             sfx_land = Hax.LoadSoundEffect("assets/land.pcm");
             sfx_peline = Hax.LoadSoundEffect("assets/paline.pcm");
             sfx_upgrade = Hax.LoadSoundEffect("assets/upgrade.pcm");
+            sfx_candy = Hax.LoadSoundEffect("assets/candy.pcm");
 
             ResetEverything();
         }

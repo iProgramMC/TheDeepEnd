@@ -15,14 +15,14 @@ namespace TheDeepEnd
         public const float runAccel = 1000.0f;
         public const float jumpSpeed = -140.0f;
         public const float springSpeed = -350.0f;
-        public const float maxFall = 400.0f;
+        public const float maxFall = 200.0f;
         public const float gravity = 900.0f;
         public const float halfGravityThreshold = 40.0f;
         public const float jumpHoldTime = 0.2f;
         public const float rehealTime = 10.0f;
         public const float flickerTime = 2.0f;
-        public const float kbMaxVelocity = -2.0f;
-        public const float kbMinXVelocity = 50.0f;
+        public const float kbMaxVelocity = -6.0f;
+        public const float kbMinXVelocity = 80.0f;
         public const int maxHealth = 1;
 
         public float jumpHoldTimer = 0f;
@@ -42,9 +42,9 @@ namespace TheDeepEnd
         public Vector2 KnockBackVelocity()
         {
             Vector2 vel2;
-            vel2 = -velocity * 0.5f;
-            if (velocity.Y > kbMaxVelocity)
-                velocity.Y = kbMaxVelocity;
+            vel2 = velocity * 0.5f;
+            velocity.X = -velocity.X;
+            velocity.Y = Math.Min(velocity.Y, kbMaxVelocity);
 
             if (Math.Abs(vel2.X) < kbMinXVelocity)
             {
@@ -286,6 +286,8 @@ namespace TheDeepEnd
 
             if (isGrounded && !oldGrounded)
                 mg.sfx_land.Play();
+            else if (!isGrounded && oldGrounded && doubleJumpEnabled)
+                isSecondJumpAvailable = true;
 
             if (Hax.Timer(ref flickerTimer, gameTime) == eTimerState.Running)
                 flickerFrame++;

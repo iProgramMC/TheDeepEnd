@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Actor.cs" />
     <Compile Include="BroomStick.cs" />
+    <Compile Include="Candy.cs" />
     <Compile Include="Collectable.cs" />
     <Compile Include="Hax.cs" />
     <Compile Include="LevelPrefabs.cs" />

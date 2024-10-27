@@ -18,7 +18,7 @@ namespace TheDeepEnd
             base.Update(mg, gameTime);
 
             collectableTimer += Hax.Elapsed(gameTime);
-            position.Y += (float)Math.Sin(collectableTimer * Math.PI) * 0.1f;
+            position.Y += (float)Math.Cos(collectableTimer * Math.PI) * 0.1f;
 
             Rectangle rect = CollisionRect(position);
 

@@ -22,8 +22,8 @@ namespace TheDeepEnd
             "W..............W" +
             "W.T#T.##..T.^^^W" +
             "W.<#>..#^^^^###W" +
-            "W..#...#####...W" +
-            "W..............W" +
+            "W..#...#####..CW" +
+            "WC.............W" +
             "WTT..^TWWWWT...W" +
             "W^^^^WWWv......W" +
             "WWWWWWW......^^W" +
@@ -33,10 +33,10 @@ namespace TheDeepEnd
             "B.......S......B" +
             "B.#>...TT...<#.B" +
             "B.#>...^^...<#.B" +
-            "B.#>..<##>..<#.B" +
+            "BC#>..<##>..<#CB" +
             "B.#>........<#.B" +
             "B.TTT.^^^^.TTT.B" +
-            "B^^^..####..^^^B" +
+            "B.....####.....B" +
             "B###.T####T.###B" +
             "BBB..<####>..P.B" +
             "BBB....vv......B" +
@@ -53,7 +53,7 @@ namespace TheDeepEnd
             "B..............B" +
             "B...^.......^..B" +
             "B...#######.W.TB" +
-            "B.........#.W..B" +
+            "B.......C.#.W..B" +
             "B.........#^W^^B" +
             "BMMMMM....MMMMMB";
         public const string Prefab4 =
@@ -64,7 +64,134 @@ namespace TheDeepEnd
             "M..MMMMM...MMMMM" +
             "M...v..MMMMM.N.M" +
             "M..............M" +
-            "M...$.....MMMMMM" +
+            "MC..$.....MMMMMM" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab5 =
+            "MMMMMMM..MMMMMMM" +
+            "MC.....S...#v#.M" +
+            "M..^..TTTT.....M" +
+            "M.<#>.^^^^..#..M" +
+            "M..v..#######..M" +
+            "M......vv......M" +
+            "MTT..........TTM" +
+            "M^^^........^^^M" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab6 =
+            "MMMMMMM..MMMMMMM" +
+            "M......S.......M" +
+            "M.###########..M" +
+            "M.#.........#.<M" +
+            "M.#T#######.#..M" +
+            "M.#.#..#>...#..M" +
+            "M.#T#.....#T#>.M" +
+            "M.#.#..####.#..M" +
+            "M..$#C....#$..PM" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab7 =
+            "MMMMMMM..MMMMMMM" +
+            "M#>....S.....<#M" +
+            "M....^####^....M" +
+            "M..MMMMMMMMMM..M" +
+            "M..##......##>.M" +
+            "M.<##.#..#T##..M" +
+            "M....T#..#....#M" +
+            "M..C..#..##>P..M" +
+            "M....$#..##>...M" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab8 =
+            "MMMMMMM..MMMMMMM" +
+            "M......S.MMMMMMM" +
+            "M......MMMM...PM" +
+            "M.....MM.......M" +
+            "M....MM........M" +
+            "M...MM...M....^M" +
+            "M..MM...MM...^MM" +
+            "M..M...MM...^MMM" +
+            "M..C..MM...^MMMM" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab9 =
+            "MMMMMMM..MMMMMMM" +
+            "M>....MS.......M" +
+            "M>.^..MMMMMMMM.M" +
+            "M>.M.....v...v.M" +
+            "M>.MMMMM...M...M" +
+            "M>..MMMMMMMMMMMM" +
+            "MMM...........<M" +
+            "MMMMM^^MMMMM..<M" +
+            "MMMMMMM.......<M" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab10 =
+            "MMMMMMM..MMMMMMM" +
+            "M..............M" +
+            "M.C..C....C..C.M" +
+            "M..S...........M" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab11 =
+            "MMMMMMM..MMMMMMM" +
+            "M.S.......<MMMMM" +
+            "MMMMM>.CC.<MvvvM" +
+            "M...M>....<M.P.M" +
+            "M...M>....<M...M" +
+            "M...M>.^^.<M...M" +
+            "M......BB....TTM" +
+            "M...BBBBBBBB...M" +
+            "M..BB..vv..BB..M" +
+            "M..............M" +
+            "M....TB..BT.N..M" +
+            "M..C..B..B....MM" +
+            "M....$B..B$.^.MM" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab12 =
+            "MMMMMMMS.MMMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM.C..MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM.C..M...MM" +
+            "MMMMMM......P.MM" +
+            "MMMMMM....M...MM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM.C..MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM.C..MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMM....MMMMMM" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab13 =
+            "MMMM...S.MMMMMMM" +
+            "M....MMMMMMMMMMM" +
+            "M.MMM........MMM" +
+            "M.M............M" +
+            "M.M..M^..^M....M" +
+            "M.MT.<M..M>...TM" +
+            "M.M..<M..M>....M" +
+            "M.M..<M..M>..P.M" +
+            "M..$.<M..M>...$M" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab14 =
+            "MMMMMMM..MMMMMMM" +
+            "M......S......<M" +
+            "M.....MMMM.....M" +
+            "M..MMMMvvMMMMM.M" +
+            "M...........vv.M" +
+            "M..^..M..M.....M" +
+            "MMMMMMM..MMMMMMM";
+        public const string Prefab15 =
+            "MMMMMMM..MMMMMMM" +
+            "MM>.....SM.N...M" +
+            "MM>..TMMMMMMMM.M" +
+            "MMM^...........M" +
+            "MMMMMMM..MM^^MMM" +
+            "M.........MMMM.M" +
+            "M>....^.......<M" +
+            "M>..MMMMMMMM..<M" +
+            "M>...C.....C..<M" +
             "MMMMMMM..MMMMMMM";
 
         public static Prefab[] Prefabs = new Prefab[]
@@ -73,6 +200,17 @@ namespace TheDeepEnd
             new Prefab { data = Prefab2, height = 12 },
             new Prefab { data = Prefab3, height = 14 },
             new Prefab { data = Prefab4, height = 9 },
+            new Prefab { data = Prefab5, height = 10 },
+            new Prefab { data = Prefab6, height = 10 },
+            new Prefab { data = Prefab7, height = 10 },
+            new Prefab { data = Prefab8, height = 10 },
+            new Prefab { data = Prefab9, height = 10 },
+            new Prefab { data = Prefab10, height = 5 }, // secret bonus !
+            new Prefab { data = Prefab11, height = 14 },
+            new Prefab { data = Prefab12, height = 20 },
+            new Prefab { data = Prefab13, height = 10 },
+            new Prefab { data = Prefab14, height = 7 },
+            new Prefab { data = Prefab15, height = 10 },
         };
 
         public static eTileType CharToTileType(char chr)
@@ -81,6 +219,7 @@ namespace TheDeepEnd
             {
                 case 'N': // Broom Stick Spawner
                 case 'P': // Pumpkin Spawner
+                case 'C': // Candy Spawner
                 case 'S': // Player Spawn
                 case '.': return eTileType.None;
                 case '#': return eTileType.Block;
@@ -99,13 +238,18 @@ namespace TheDeepEnd
 
         public static Prefab GetRandomPrefab(Random r, ref int exclude)
         {
-            int chosen;
-            do {
-                chosen = r.Next(Prefabs.Length);
-            }
-            while (chosen == exclude && Prefabs.Length > 1);
+            if (exclude == -1) exclude = 0;
+            int chosen = (exclude + Prefabs.Length - 1) % Prefabs.Length;
             exclude = chosen;
-            return Prefabs[chosen];
+            return Prefabs[chosen]; 
+        
+            //int chosen;
+            //do {
+                //chosen = r.Next(Prefabs.Length);
+            //}
+            //while (chosen == exclude && Prefabs.Length > 1);
+            //exclude = chosen;
+            //return Prefabs[chosen];
         }
     }
 }
