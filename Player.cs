@@ -15,8 +15,8 @@ namespace TheDeepEnd
         public const float runAccel = 1000.0f;
         public const float jumpSpeed = -140.0f;
         public const float springSpeed = -350.0f;
-        public const float maxFall = 240.0f;
-        public const float gravity = 500.0f;
+        public const float maxFall = 200.0f;
+        public const float gravity = 900.0f;
         public const float halfGravityThreshold = 40.0f;
         public const float jumpHoldTime = 0.2f;
         public const float rehealTime = 10.0f;

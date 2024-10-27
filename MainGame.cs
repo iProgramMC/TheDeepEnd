@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -117,6 +118,11 @@ namespace TheDeepEnd
                 highHeight = scoreHeight;
                 hasHighHeight = true;
             }
+
+            string[] str = new string[2];
+            str[0] = highScore.ToString();
+            str[1] = highHeight.ToString();
+            File.WriteAllLines("high_scores.txt", str);
         }
 
         Level level;
@@ -140,6 +146,18 @@ namespace TheDeepEnd
             graphics.PreferredBackBufferHeight = (int)(canvasHeight * startScale);
 
             Window.Title = "The Deep End";
+
+            // try to load high scores from a previous session
+            try {
+                string[] lines = File.ReadAllLines("high_scores.txt");
+
+                highScore = int.Parse(lines[0]);
+                highHeight = int.Parse(lines[1]);
+            }
+            catch (Exception ex) {
+                Debug.WriteLine("couldn't read file high_scores.txt: " + ex.ToString());
+                Debug.WriteLine("clearing score");
+            }
         }
 
         protected override void Initialize()
