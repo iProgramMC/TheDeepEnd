@@ -11,7 +11,8 @@ namespace JeffJamGame
         None,
         Solid,
         Deadly,
-        JumpThrough
+        JumpThrough,
+        Spring,
     }
     public class TileInfo
     {
@@ -26,7 +27,11 @@ namespace JeffJamGame
         Deadly_RIGHT,
         Deadly_LEFT,
         Deadly_DOWN,
-        JumpThrough
+        JumpThrough,
+        Brick,
+        Stone,
+        WhiteBrick,
+        Spring,
     }
     public static class TileManager
     {
@@ -39,6 +44,10 @@ namespace JeffJamGame
             new TileInfo { texX = 3, texY = 0, collisionType = eCollisionType.Deadly }, // DEADLY LEFT
             new TileInfo { texX = 4, texY = 0, collisionType = eCollisionType.Deadly }, // DEADLY DOWN
             new TileInfo { texX = 5, texY = 0, collisionType = eCollisionType.JumpThrough }, // JUMPTHROUGH
+            new TileInfo { texX = 0, texY = 1, collisionType = eCollisionType.Solid }, // BRICK
+            new TileInfo { texX = 1, texY = 1, collisionType = eCollisionType.Solid }, // STONE
+            new TileInfo { texX = 2, texY = 1, collisionType = eCollisionType.Solid }, // WHITE BRICK
+            new TileInfo { texX = 0, texY = 2, collisionType = eCollisionType.Spring }, // WHITE BRICK
         };
 
         public static TileInfo GetTileInfo(eTileType tt)

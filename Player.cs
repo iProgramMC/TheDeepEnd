@@ -13,6 +13,7 @@ namespace JeffJamGame
         public const float runReduce = 500.0f;
         public const float runAccel = 1000.0f;
         public const float jumpSpeed = -140.0f;
+        public const float springSpeed = -350.0f;
         public const float maxFall = 400.0f;
         public const float gravity = 900.0f;
         public const float halfGravityThreshold = 40.0f;
@@ -100,6 +101,23 @@ namespace JeffJamGame
             while (walkAnimation > .2f)
                 walkAnimation -= .2f;
         }
+        
+        bool SpringCheck(Point tilePos)
+        {
+            // check if the player is actually IN The spring hit box
+            Rectangle rect1 = new Rectangle(tilePos.X * tileSize + 2, tilePos.Y * tileSize + tileSize - 3, tileSize - 4, 3);
+            Rectangle rect2 = new Rectangle((int)position.X, (int)position.Y, (int)hitBoxSize.X, (int)hitBoxSize.Y);
+            if (rect1.Intersects(rect2))
+            {
+                // bouncy bounce bounce!
+                isGrounded = false;
+                velocity.Y = springSpeed;
+                jumpHoldTimer = 0.0f;
+                level.SpecialEffect(tilePos, Level.springSpecialEffectTime);
+                return true;
+            }
+            else return false;
+        }
 
         bool OnTileTouchedHorizontally(Point tilePos)
         {
@@ -114,6 +132,9 @@ namespace JeffJamGame
                 Die();
                 return true;
             }
+
+            if (ti.collisionType == eCollisionType.Spring)
+                return SpringCheck(tilePos);
 
             velocity.X = 0;
             return false;
@@ -132,6 +153,9 @@ namespace JeffJamGame
                 Die();
                 return true;
             }
+
+            if (ti.collisionType == eCollisionType.Spring)
+                return SpringCheck(tilePos);
 
             if (velocity.Y < 0)
                 velocity.Y = 0;

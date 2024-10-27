@@ -15,38 +15,69 @@ namespace JeffJamGame
     // LevelWidth X 12 prefabs of level.
     public class LevelPrefabs
     {
-        public const int prefabHeight = 12;
-
         public const string Prefab1 =
-            "#..............#" +
-            "#..............#" +
-            "##########.....#" +
-            "#..............#" +
-            "#.T#T.##..T.^^^#" +
-            "#.<#>..#^^^^####" +
-            "#..#...#####...#" +
-            "#..............#" +
-            "#TT..^T####T...#" +
-            "#^^^^###v......#" +
-            "#######......^^#" +
-            "######....######";
+            "WWWWWWW..WWWWWWW" +
+            "Wvvvv#.S.......W" +
+            "W....#####.....W" +
+            "W..............W" +
+            "W.T#T.##..T.^^^W" +
+            "W.<#>..#^^^^###W" +
+            "W..#...#####...W" +
+            "W..............W" +
+            "WTT..^TWWWWT...W" +
+            "W^^^^WWWv......W" +
+            "WWWWWWW......^^W" +
+            "WWWWWW....WWWWWW";
+        public const string Prefab2 =
+            "BMMMMMM..MMMMMMB" +
+            "B.......S......B" +
+            "B.#>...TT...<#.B" +
+            "B.#>...^^...<#.B" +
+            "B.#>..<##>..<#.B" +
+            "B.#>........<#.B" +
+            "B.TTT.^^^^.TTT.B" +
+            "B^^^..####..^^^B" +
+            "B###.T####T.###B" +
+            "BBB..<####>..BBB" +
+            "BBB....vv....BBB" +
+            "BMMMMM....MMMMMB";
+        public const string Prefab3 =
+            "BMMMMMM..MMMMMMB" +
+            "B>.......#.....B" +
+            "B>..$..S.#..^..B" +
+            "B>..######T###.B" +
+            "B>.....vv..###.B" +
+            "B>........$###.B" +
+            "B###^^########.B" +
+            "B..####........B" +
+            "B..............B" +
+            "B..............B" +
+            "B..............B" +
+            "BMMMMM....MMMMMB";
 
         public static Prefab[] Prefabs = new Prefab[]
         {
             new Prefab { data = Prefab1, height = 12 },
+            new Prefab { data = Prefab2, height = 12 },
+            new Prefab { data = Prefab3, height = 12 },
         };
 
         public static eTileType CharToTileType(char chr)
         {
             switch (chr)
             {
-                case '.': return eTileType.None;
+                case '.':
+                case 'S': return eTileType.None;
                 case '#': return eTileType.Block;
                 case 'T': return eTileType.JumpThrough;
                 case '^': return eTileType.Deadly_UP;
                 case '>': return eTileType.Deadly_RIGHT;
                 case '<': return eTileType.Deadly_LEFT;
                 case 'v': return eTileType.Deadly_DOWN;
+                case 'B': return eTileType.Brick;
+                case 'M': return eTileType.Stone;
+                case 'W': return eTileType.WhiteBrick;
+                case '$': return eTileType.Spring;
                 default: throw new Exception("unknown character '" + chr + "'!");
             }
         }

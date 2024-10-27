@@ -67,7 +67,7 @@ namespace JeffJamGame
             eTileType tt = level.GetTile(tilePosition.X, tilePosition.Y);
             TileInfo ti = TileManager.GetTileInfo(tt);
 
-            if (ti.collisionType == eCollisionType.None || ti.collisionType == eCollisionType.JumpThrough)
+            if (ti.collisionType == eCollisionType.None || ti.collisionType == eCollisionType.Spring || ti.collisionType == eCollisionType.JumpThrough)
                 return false;
 
             return true;
@@ -78,7 +78,7 @@ namespace JeffJamGame
             eTileType tt = level.GetTile(tilePosition.X, tilePosition.Y);
             TileInfo ti = TileManager.GetTileInfo(tt);
 
-            if (ti.collisionType == eCollisionType.None)
+            if (ti.collisionType == eCollisionType.None || ti.collisionType == eCollisionType.Spring)
                 return false;
 
             if (ti.collisionType == eCollisionType.JumpThrough)

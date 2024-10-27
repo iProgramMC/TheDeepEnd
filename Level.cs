@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -11,14 +12,38 @@ namespace JeffJamGame
     {
         public const int levelWidth = MainGame.levelWidth;
         public const int levelHeight = MainGame.levelHeight;
+        public const float springSpecialEffectTime = 1.0f;
 
         // access: tiles[X, Y]
         public eTileType[,] tiles = new eTileType[MainGame.levelWidth, MainGame.levelHeight * 2];
+        public Dictionary<Point, float> specialEffectTimers = new Dictionary<Point, float>();
         public readonly MainGame mainGame;
 
         public Level(MainGame mg)
         {
             mainGame = mg;
+        }
+
+        public void SpecialEffect(Point p, float t)
+        {
+            specialEffectTimers[p] = t;
+        }
+
+        public void UpdateSpecialEffects(GameTime gt)
+        {
+            List<Point> lp = new List<Point>();
+            foreach (var kvp in specialEffectTimers)
+                lp.Add(kvp.Key);
+
+            foreach (Point p in lp)
+            {
+                float f = specialEffectTimers[p] - Hax.Elapsed(gt);
+                if (f <= 0) {
+                    specialEffectTimers.Remove(p);
+                }
+
+                specialEffectTimers[p] = f;
+            }
         }
 
         public void PlacePrefab(int y, string prefab)
@@ -34,10 +59,15 @@ namespace JeffJamGame
             }
         }
 
-        public void PlacePrefabSlice(int y, int ySliceOfPrefab, Prefab prefab)
+        public void PlacePrefabSlice(int y, int ySliceOfPrefab, Prefab prefab, ref int spawnPointX)
         {
+            spawnPointX = -1;
             for (int xo = 0; xo < levelWidth; xo++)
-                SetTile(xo, y, LevelPrefabs.CharToTileType(prefab.data[ySliceOfPrefab * levelWidth + xo]));
+            {
+                char chr = prefab.data[ySliceOfPrefab * levelWidth + xo];
+                if (chr == 'S') spawnPointX = xo;
+                SetTile(xo, y, LevelPrefabs.CharToTileType(chr));
+            }
         }
 
         public void DrawBorder(int ix, int iy, int width, int height, eTileType tileType)
@@ -72,6 +102,14 @@ namespace JeffJamGame
             int y2 = y % (MainGame.levelHeight * 2);
             if (y2 < 0) y2 += MainGame.levelHeight * 2;
             tiles[x, y2] = tt;
+        }
+
+        public float GetSpecialEffectTimer(Point point)
+        {
+            if (specialEffectTimers.ContainsKey(point))
+                return specialEffectTimers[point];
+
+            return 0;
         }
     }
 }

@@ -44,7 +44,7 @@ namespace JeffJamGame
 
         public const int levelWidth = canvasWidth / tileSize;
         public const int levelHeight = canvasHeight / tileSize;
-        public const int cameraScrollAheadLimit = canvasHeight / 2;
+        public const int cameraScrollAheadLimit = (int) (canvasHeight * 0.4f);
         public const float fadeOutTime = 0.5f;
         public const float fadeInTime = 0.5f;
         public const float deathTime = 1.0f;
@@ -59,6 +59,13 @@ namespace JeffJamGame
         float fadeOutTimer = 0f; // fade out
         float fadeInTimer = 0f; // fade in
         int cameraY = 0;
+
+        // PLAYER SCORE
+        int maxPlayerY = 0;
+
+        // HIGH SCORE
+        int highScore = 0;
+        bool hasHighScore = false; // does this session have a high score?
 
         Level level;
         List<Actor> actors = new List<Actor>();
@@ -114,15 +121,34 @@ namespace JeffJamGame
             fadeOutTimer = 0;
             deathTimer = 0;
 
-            for (int y = 0; y < levelHeight * 2; y++)
-                GenerateRow(y);
+            int spawnPointX = -1, spawnPointY = -1;
 
-            actors.Add(new Player(level, new Vector2(16, 16)));
+            for (int y = 0; y < levelHeight * 2; y++)
+            {
+                int spX = GenerateRow(y);
+                if (spX >= 0 && spawnPointX < 0)
+                {
+                    spawnPointX = spX;
+                    spawnPointY = y;
+                }
+            }
+
+            if (spawnPointX < 0)
+                throw new Exception("Didn't decide on a spawn point! :(");
+
+            actors.Add(new Player(level, new Vector2(spawnPointX * 16, spawnPointY * 16)));
         }
 
         public void StartDeathSequence()
         {
             deathTimer = deathTime;
+
+            // Check if there was a new high score
+            if (highScore < maxPlayerY)
+            {
+                highScore = maxPlayerY;
+                hasHighScore = true;
+            }
         }
 
         int prefabY, prefabIndex;
@@ -130,8 +156,9 @@ namespace JeffJamGame
 
         public int CameraY { get => cameraY; }
 
-        void GenerateRow(int rowToGenerate)
+        int GenerateRow(int rowToGenerate)
         {
+            int spawnPointX = 0;
             if (prefabY == currentPrefab.height)
             {
                 // shit, we need to choose.
@@ -140,8 +167,9 @@ namespace JeffJamGame
             }
 
             // then advance the current prefab
-            level.PlacePrefabSlice(rowToGenerate, prefabY, currentPrefab);
+            level.PlacePrefabSlice(rowToGenerate, prefabY, currentPrefab, ref spawnPointX);
             prefabY++;
+            return spawnPointX;
         }
 
         void ScrollDown(int amount)
@@ -246,6 +274,8 @@ namespace JeffJamGame
                 {
                     ScrollDown((int)(plr.position.Y - cameraY - cameraScrollAheadLimit));
                 }
+
+                maxPlayerY = Math.Max(maxPlayerY, (int)plr.position.Y);
             }
 
             for (int i = 0; i < actors.Count; i++)
@@ -257,6 +287,8 @@ namespace JeffJamGame
                     continue;
                 }
             }
+
+            level.UpdateSpecialEffects(gameTime);
 
             if (keyboardState.IsKeyDown(jumpKey) && !prevKeyboardState.IsKeyDown(jumpKey))
             {
@@ -274,6 +306,8 @@ namespace JeffJamGame
             translateMatrix = Matrix.CreateTranslation(new Vector3((GraphicsDevice.Viewport.Width - (float)(canvasWidth * gameScale)) / 2, 0, 0));
         }
 
+        readonly int[] springFrameTable = new int[] { 4, 1, 4, 1, 4, 1, 1, 1, 1, 4, 4, 4, 2, 2, 2, 5, 5, 5, 3, 3, 3, 3, 6, 6, 0 };
+
         void DrawLevel()
         {
             for (int y = 0; y < levelWidth + 1; y++)
@@ -284,13 +318,21 @@ namespace JeffJamGame
                     if (tt == eTileType.None)
                         continue;
 
-                    int fineY = cameraY % tileSize;
-
                     TileInfo ti = TileManager.GetTileInfo(tt);
+                    int fineY = cameraY % tileSize;
+                    int frameX = ti.texX, frameY = ti.texY;
+
+                    float f;
+                    if (ti.collisionType == eCollisionType.Spring &&
+                        (f = level.GetSpecialEffectTimer(new Point(x, y + cameraY / tileSize))) > 0)
+                    {
+                        frameX += springFrameTable[(int)((1.0f - f / Level.springSpecialEffectTime) * springFrameTable.Length)];
+                    }
+
                     spriteBatch.Draw(
                         tilesTex,
                         new Rectangle(x * tileSize, y * tileSize - fineY, tileSize, tileSize),
-                        new Rectangle(ti.texX * tileSize, ti.texY * tileSize, tileSize, tileSize),
+                        new Rectangle(frameX * tileSize, frameY * tileSize, tileSize, tileSize),
                         Color.White
                     );
                 }
