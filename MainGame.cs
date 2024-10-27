@@ -111,7 +111,7 @@ namespace TheDeepEnd
                 hasHighScore = true;
             }
 
-            scoreHeight = Math.Max((maxPlayerY / tileSize) - 40 - 8, 0); // 40 is the height of the first prefab, 8 for penalty for failing the first part
+            scoreHeight = Math.Max((maxPlayerY / tileSize) - 40, 0); // 40 is the height of the first prefab, 8 for penalty for failing the first part
             if (highHeight < scoreHeight)
             {
                 highHeight = scoreHeight;
@@ -256,7 +256,6 @@ namespace TheDeepEnd
         {
             int oldCameraY = cameraY;
             cameraY += amount;
-            maxPlayerY += amount;
 
             // if crossed a row boundary, then generate the next row
             if (oldCameraY / tileSize != cameraY / tileSize)
@@ -356,6 +355,8 @@ namespace TheDeepEnd
 
             if (!(plr is null))
             {
+                maxPlayerY = (int)Math.Max(maxPlayerY, plr.position.Y);
+
                 if (plr.position.Y - cameraY > cameraScrollAheadLimit)
                     ScrollDown((int)(plr.position.Y - cameraY - cameraScrollAheadLimit));
             }
@@ -617,16 +618,23 @@ namespace TheDeepEnd
         {
             const float titleScale = 0.4f;
             const float normalScale = 0.2f;
+            const float copyrightScale = 0.1f;
 
             const string titleStr = "The Deep End";
             const string pressEnterStr = "Press ENTER to begin!";
+            const string copyrightStr = "Copyright (C) 2024 iProgramInCpp";
 
-            float titleStrSize = font.MeasureString(titleStr).X * titleScale;
+            var vec = font.MeasureString(titleStr);
+            float fontHeight = vec.Y;
+            float titleStrSize = vec.X * titleScale;
             float pressEnterStrSize = font.MeasureString(pressEnterStr).X * normalScale;
+            float copyrightStrSize = font.MeasureString(copyrightStr).X * copyrightScale;
 
             Color color = Hax.HSVToRGB(somethingHue, 1.0f, 1.0f);
             spriteBatch.DrawString(font, titleStr, new Vector2(canvasWidth / 2 - titleStrSize / 2, 32), color, 0.0f, Vector2.Zero, titleScale, SpriteEffects.None, 0.0f);
             spriteBatch.DrawString(font, pressEnterStr, new Vector2(canvasWidth / 2 - pressEnterStrSize / 2, canvasHeight / 2), Color.White, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, copyrightStr, new Vector2(canvasWidth / 2 - copyrightStrSize / 2, canvasHeight - 30 - fontHeight * copyrightScale), Color.White, 0.0f, Vector2.Zero, copyrightScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, "V1.00", new Vector2(10, canvasHeight - 10 - fontHeight * copyrightScale), Color.White, 0.0f, Vector2.Zero, copyrightScale, SpriteEffects.None, 0.0f);
 
             if (isControlsScreenShown)
                 spriteBatch.Draw(controlsTex, new Rectangle((int)(canvasWidth * Hax.Smoothstep(2f * controlsOffs)), 0, canvasWidth, canvasHeight), Color.White);

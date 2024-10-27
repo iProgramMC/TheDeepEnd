@@ -15,13 +15,13 @@ namespace TheDeepEnd
         public const float runAccel = 1000.0f;
         public const float jumpSpeed = -140.0f;
         public const float springSpeed = -350.0f;
-        public const float maxFall = 200.0f;
-        public const float gravity = 900.0f;
+        public const float maxFall = 240.0f;
+        public const float gravity = 500.0f;
         public const float halfGravityThreshold = 40.0f;
         public const float jumpHoldTime = 0.2f;
         public const float rehealTime = 10.0f;
         public const float flickerTime = 2.0f;
-        public const float kbMaxVelocity = -6.0f;
+        public const float kbMaxVelocity = -100.0f;
         public const float kbMinXVelocity = 80.0f;
         public const int maxHealth = 1;
 
@@ -43,13 +43,13 @@ namespace TheDeepEnd
         {
             Vector2 vel2;
             vel2 = velocity * 0.5f;
-            velocity.X = -velocity.X;
-            velocity.Y = Math.Min(velocity.Y, kbMaxVelocity);
+            vel2.X = -vel2.X;
+            vel2.Y = Math.Min(-vel2.Y, kbMaxVelocity);
 
             if (Math.Abs(vel2.X) < kbMinXVelocity)
             {
                 if (vel2.X != 0)
-                    vel2.X = Math.Sign(velocity.X) * kbMinXVelocity;
+                    vel2.X = Math.Sign(vel2.X) * kbMinXVelocity;
                 else
                     vel2.X = (facingLeft ? 1 : -1) * kbMinXVelocity;
             }
