@@ -96,5 +96,66 @@ namespace JeffJamGame
 
             return false;
         }
+        public static Color HSVToRGB(float a1, float a2, float a3)
+        {
+            int rOut, gOut, bOut;
+	        if (a2 <= 0.0f)
+	        {
+		        rOut = gOut = bOut = (int)(a3 * 255);
+	        }
+	        else if (a1 < 360.0f)
+	        {
+		        int   v10 = (int)(a1 / 60);
+		        float v11 = a1 / 60 - v10;
+
+		        float v6  = (1.0f - a2) * a3;
+		        float v14 = (1.0f - (a2 * v11)) * a3;
+		        float v12 = (1.0f - ((1.0f - v11) * a2)) * a3;
+
+		        switch (v10)
+		        {
+		            case 0:
+			            rOut = (int)(a3  * 255);
+			            gOut = (int)(v12 * 255);
+			            bOut = (int)(v6  * 255);
+			            return Color.FromNonPremultiplied(rOut, gOut, bOut, 255);
+		            case 1:
+			            rOut = (int)(v14 * 255);
+			            gOut = (int)(a3  * 255);
+			            bOut = (int)(v6  * 255);
+			            return Color.FromNonPremultiplied(rOut, gOut, bOut, 255);
+		            case 2:
+			            rOut = (int)(v6  * 255);
+			            gOut = (int)(a3  * 255);
+			            bOut = (int)(v12 * 255);
+			            return Color.FromNonPremultiplied(rOut, gOut, bOut, 255);
+		            case 3:
+			            rOut = (int)(v6  * 255);
+			            gOut = (int)(v14 * 255);
+			            bOut = (int)(a3  * 255);
+			            return Color.FromNonPremultiplied(rOut, gOut, bOut, 255);
+		            case 4:
+			            rOut = (int)(v12 * 255);
+			            gOut = (int)(v6  * 255);
+			            bOut = (int)(a3  * 255);
+			            return Color.FromNonPremultiplied(rOut, gOut, bOut, 255);
+		            default:
+			            rOut = (int)(a3  * 255);
+			            gOut = (int)(v6  * 255);
+			            bOut = (int)(v14 * 255);
+			            return Color.FromNonPremultiplied(rOut, gOut, bOut, 255);
+		        }
+	        }
+	        else
+	        {
+		        float v6 = (1.0f - a2) * a3;
+
+		        rOut = (int)(a3 * 255);
+		        gOut = (int)(v6 * 255);
+		        bOut = (int)(v6 * 255);
+	        }
+
+            return Color.FromNonPremultiplied(rOut, gOut, bOut, 255);
+        }
     }
 }

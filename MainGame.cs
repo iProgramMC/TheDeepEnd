@@ -63,6 +63,11 @@ namespace JeffJamGame
         float fadeInTimer = 0f; // fade in
         int cameraY = 0;
 
+        bool isGameOverScreenShown = false;
+        float gameOverScreenPos = 0f;
+        float gameOverScreenVel = 0f;
+        float gameOverTimeActive = 0f;
+
         // PLAYER SCORE
         int maxPlayerY = 0;
 
@@ -128,6 +133,8 @@ namespace JeffJamGame
             fadeInTimer = fadeInTime;
             fadeOutTimer = 0;
             deathTimer = 0;
+            isGameOverScreenShown = false;
+            maxPlayerY = 0;
 
             int spawnPointX = -1, spawnPointY = -1;
 
@@ -186,6 +193,7 @@ namespace JeffJamGame
         {
             int oldCameraY = cameraY;
             cameraY += amount;
+            maxPlayerY += amount;
 
             // if crossed a row boundary, then generate the next row
             if (oldCameraY / tileSize != cameraY / tileSize)
@@ -234,39 +242,44 @@ namespace JeffJamGame
             prevKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
 
-            //if (keyboardState.IsKeyDown(Keys.Down))
-            //    ScrollDown(4);
-
-            if (deathTimer > 0)
+            if (Hax.Timer(ref deathTimer, gameTime) == eTimerState.Finished)
             {
-                deathTimer -= Hax.Elapsed(gameTime);
+                // show the game over screen
+                //fadeOutTimer = fadeOutTime;
+                isGameOverScreenShown = true;
+                gameOverScreenPos = -canvasHeight;
+                gameOverScreenVel = 400;
+            }
 
-                if (deathTimer <= 0)
+            if (Hax.Timer(ref fadeOutTimer, gameTime) == eTimerState.Finished)
+            {
+                ResetEverything();
+                return;
+            }
+
+            Hax.Timer(ref fadeInTimer, gameTime);
+
+            if (isGameOverScreenShown)
+            {
+                gameOverTimeActive += Hax.Elapsed(gameTime) * 50;
+                while (gameOverTimeActive > 360)
+                    gameOverTimeActive -= 360;
+
+                // make it fall
+                gameOverScreenPos += gameOverScreenVel * Hax.Elapsed(gameTime);
+                Hax.SetFloatWithTarget(ref gameOverScreenVel, 1000f, Hax.Elapsed(gameTime) * 500);
+
+                if (gameOverScreenPos > 0)
                 {
-                    deathTimer = 0;
-                    // show the game over screen
+                    if (Math.Abs(gameOverScreenVel) > 50)
+                        gameOverScreenVel = -gameOverScreenVel * 0.4f;
+                    else
+                        gameOverScreenVel = 0;
+                    gameOverScreenPos = 0;
+                }
+
+                if (keyboardState.IsKeyDown(Keys.Enter) && !prevKeyboardState.IsKeyDown(Keys.Enter) && fadeOutTimer == 0)
                     fadeOutTimer = fadeOutTime;
-                }
-            }
-            
-            if (fadeOutTimer > 0)
-            {
-                fadeOutTimer -= Hax.Elapsed(gameTime);
-
-                if (fadeOutTimer <= 0)
-                {
-                    fadeOutTimer = 0;
-                    ResetEverything();
-                    return;
-                }
-            }
-            
-            if (fadeInTimer > 0)
-            {
-                fadeInTimer -= Hax.Elapsed(gameTime);
-
-                if (fadeInTimer <= 0)
-                    fadeInTimer = 0;
             }
 
             Player plr = null;
@@ -281,11 +294,7 @@ namespace JeffJamGame
             if (!(plr is null))
             {
                 if (plr.position.Y - cameraY > cameraScrollAheadLimit)
-                {
                     ScrollDown((int)(plr.position.Y - cameraY - cameraScrollAheadLimit));
-                }
-
-                maxPlayerY = Math.Max(maxPlayerY, (int)plr.position.Y);
             }
 
             for (int i = 0; i < actors.Count; i++)
@@ -372,12 +381,57 @@ namespace JeffJamGame
                 DrawActor(actor);
         }
 
+        void DrawGameOverScreenBG()
+        {
+            spriteBatch.Draw(gameOverBgTex, new Rectangle(0, (int)gameOverScreenPos, canvasWidth, canvasHeight), Color.White);
+        }
+
+        void DrawGameOverScreenText()
+        {
+            const string gameOver = "Game Over!";
+            const string pressEnterStr = "Press Enter to Restart!";
+
+            int w = (int) gameOverScreenPos;
+
+            // Game Over !
+            const float titleScale = 0.4f;
+            float msr = font.MeasureString(gameOver).X * titleScale / 2;
+            spriteBatch.DrawString(font, gameOver, new Vector2(canvasWidth / 2 - msr, 40 + w), Color.Black, 0.0f, Vector2.Zero, titleScale, SpriteEffects.None, 0.0f);
+
+            const float normalScale = 0.2f;
+            string scoreStr = maxPlayerY.ToString();
+            string highScoreStr = highScore.ToString();
+            float scoreStrSize = font.MeasureString(scoreStr).X * normalScale;
+            float highScoreStrSize = font.MeasureString(highScoreStr).X * normalScale;
+            float pressEnterStrSize = font.MeasureString(pressEnterStr).X * normalScale;
+
+            spriteBatch.DrawString(font, "Score: ",      new Vector2(32, w+96),                                   Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, "High Score: ", new Vector2(32, w+128),                                  Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, scoreStr,       new Vector2(canvasWidth - 32 - scoreStrSize,     w+96),  Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, highScoreStr,   new Vector2(canvasWidth - 32 - highScoreStrSize, w+128), Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+
+            Color color = Hax.HSVToRGB(gameOverTimeActive, 1.0f, 1.0f);
+            spriteBatch.DrawString(font, pressEnterStr, new Vector2(canvasWidth / 2 - pressEnterStrSize / 2, w + 180), color, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+        }
+
+        void DrawFades()
+        {
+            // note: these timers are DECREASING
+            float alpha = fadeOutTimer == 0 ? 0.0f : Hax.Lerp(0.0f, 1.0f, 1.0f - (fadeOutTimer / fadeOutTime));
+            float alpha2 = fadeInTimer == 0 ? 0.0f : Hax.Lerp(0.0f, 1.0f, fadeInTimer / fadeInTime);
+            alpha = Math.Max(alpha, alpha2);
+
+            if (alpha > 0.01f)
+                spriteBatch.Draw(blankTexture, new Rectangle(0, 0, canvasWidth, canvasHeight), Color.FromNonPremultiplied(0, 0, 0, (int)(255 * alpha)));
+        }
+
         /// This is called when the game should draw itself.
         /// param gameTime Provides a snapshot of timing values.
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);// FromNonPremultiplied(10, 10, 10, 255));
 
+            // POINT CLAMP, SCALED
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null, scaleMatrix * translateMatrix);
 
             // draw letterboxes
@@ -386,17 +440,23 @@ namespace JeffJamGame
 
             DrawLevel();
             DrawActors();
-
-            // note: these timers are DECREASING
-            float alpha  = fadeOutTimer == 0 ? 0.0f : Hax.Lerp(0.0f, 1.0f, 1.0f - (fadeOutTimer / fadeOutTime));
-            float alpha2 = fadeInTimer  == 0 ? 0.0f : Hax.Lerp(0.0f, 1.0f, fadeInTimer / fadeInTime);
-            alpha = Math.Max(alpha, alpha2);
-
-            if (alpha > 0.01f)
-                spriteBatch.Draw(blankTexture, new Rectangle(0, 0, canvasWidth, canvasHeight), Color.FromNonPremultiplied(0, 0, 0, (int)(255 * alpha)));
+            if (isGameOverScreenShown) DrawGameOverScreenBG();
 
             spriteBatch.End();
 
+
+            // LINEAR CLAMP, SCALED
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, scaleMatrix * translateMatrix);
+
+            if (isGameOverScreenShown)
+                DrawGameOverScreenText();
+
+            DrawFades();
+
+            spriteBatch.End();
+
+
+            // POINT CLAMP, NON SCALED
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null, translateMatrix);
 
             Player plr = null;
