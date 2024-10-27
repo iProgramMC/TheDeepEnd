@@ -56,12 +56,23 @@ namespace JeffJamGame
             "B.........#.W..B" +
             "B.........#^W^^B" +
             "BMMMMM....MMMMMB";
+        public const string Prefab4 =
+            "MMMMMMM..MMMMMMM" +
+            "M.....MS.....<MM" +
+            "M..^..MMMMM..<MM" +
+            "M..M$....v...<MM" +
+            "M..MMMMM...MMMMM" +
+            "M...v..MMMMMMMMM" +
+            "M.........MMMMMM" +
+            "M...$.....MMMMMM" +
+            "MMMMMMM..MMMMMMM";
 
         public static Prefab[] Prefabs = new Prefab[]
         {
             new Prefab { data = Prefab1, height = 12 },
             new Prefab { data = Prefab2, height = 12 },
             new Prefab { data = Prefab3, height = 14 },
+            new Prefab { data = Prefab4, height = 9 },
         };
 
         public static eTileType CharToTileType(char chr)

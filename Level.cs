@@ -59,14 +59,23 @@ namespace JeffJamGame
             }
         }
 
-        public void PlacePrefabSlice(int y, int ySliceOfPrefab, Prefab prefab, ref int spawnPointX)
+        public void PlacePrefabSlice(int y, int ySliceOfPrefab, Prefab prefab, ref int spawnPointX, bool flipHorizontally)
         {
             spawnPointX = -1;
             for (int xo = 0; xo < levelWidth; xo++)
             {
                 char chr = prefab.data[ySliceOfPrefab * levelWidth + xo];
                 if (chr == 'S') spawnPointX = xo;
-                SetTile(xo, y, LevelPrefabs.CharToTileType(chr));
+
+                int dx = xo;
+                if (flipHorizontally)
+                {
+                    dx = levelWidth - 1 - xo;
+                    /**/ if (chr == '>') chr = '<';
+                    else if (chr == '<') chr = '>';
+                }
+
+                SetTile(dx, y, LevelPrefabs.CharToTileType(chr));
             }
         }
 

@@ -109,10 +109,11 @@ namespace JeffJamGame
             }
         }
 
-        public Rectangle QULRect(Point tp) => new Rectangle(tp.X * tileSize, tp.Y * tileSize, tileSize / 2, tileSize / 2);
-        public Rectangle QURRect(Point tp) => new Rectangle(tp.X * tileSize + tileSize / 2, tp.Y * tileSize, tileSize / 2, tileSize / 2);
-        public Rectangle QDLRect(Point tp) => new Rectangle(tp.X * tileSize, tp.Y * tileSize + tileSize / 2, tileSize / 2, tileSize / 2);
-        public Rectangle QDRRect(Point tp) => new Rectangle(tp.X * tileSize + tileSize / 2, tp.Y * tileSize + tileSize / 2, tileSize / 2, tileSize / 2);
+        public const int d = 3;
+        public Rectangle QULRect(Point tp) => new Rectangle(tp.X * tileSize + d, tp.Y * tileSize, tileSize / 2 - d, tileSize / 2);
+        public Rectangle QURRect(Point tp) => new Rectangle(tp.X * tileSize + tileSize / 2, tp.Y * tileSize, tileSize / 2 - d, tileSize / 2);
+        public Rectangle QDLRect(Point tp) => new Rectangle(tp.X * tileSize + d, tp.Y * tileSize + tileSize / 2, tileSize / 2 - d, tileSize / 2);
+        public Rectangle QDRRect(Point tp) => new Rectangle(tp.X * tileSize + tileSize / 2, tp.Y * tileSize + tileSize / 2, tileSize / 2 - d, tileSize / 2);
 
         public bool CollideY(Point tilePosition, Vector2 actorPosition, int moveUnit)
         {

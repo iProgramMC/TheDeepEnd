@@ -9,25 +9,11 @@ namespace JeffJamGame
 {
     public class PlayerCorpse : Actor
     {
-        public const float maxVelocity = -2.0f;
-        public const float minXVelocity = 50.0f;
-
         public PlayerCorpse(Level level, Player player) :
             base(level, player.hitBoxSize, player.position)
         {
-            velocity = -player.velocity * 0.5f;
-            if (velocity.Y > maxVelocity)
-                velocity.Y = maxVelocity;
-
-            if (Math.Abs(velocity.X) < minXVelocity)
-            {
-                if (velocity.X != 0)
-                    velocity.X = Math.Sign(velocity.X) * minXVelocity;
-                else
-                    velocity.X = (player.facingLeft ? 1 : -1) * minXVelocity;
-            }
-
-            facingLeft = !player.facingLeft;
+            velocity = player.KnockBackVelocity();
+            facingLeft = velocity.X >= 0;
         }
 
         public override void Update(MainGame mg, GameTime gameTime)

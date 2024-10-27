@@ -8,6 +8,12 @@ using System.Text;
 
 namespace JeffJamGame
 {
+    public enum eTimerState
+    {
+        NotRunning,
+        Running,
+        Finished
+    }
     public class Hax
     {
         public static Texture2D LoadTexture2D(GraphicsDevice gd, string an)
@@ -16,6 +22,23 @@ namespace JeffJamGame
             Texture2D result = Texture2D.FromStream(gd, stream);
             stream.Close();
             return result;
+        }
+
+        public static eTimerState Timer(ref float timer, GameTime gt)
+        {
+            if (timer > 0)
+            {
+                timer -= Elapsed(gt);
+                if (timer < 0)
+                {
+                    timer = 0;
+                    return eTimerState.Finished;
+                }
+
+                return eTimerState.Running;
+            }
+
+            return eTimerState.NotRunning;
         }
 
         public static float Elapsed(GameTime gt)

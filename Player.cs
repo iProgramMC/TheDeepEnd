@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JeffJamGame
@@ -18,20 +19,64 @@ namespace JeffJamGame
         public const float gravity = 900.0f;
         public const float halfGravityThreshold = 40.0f;
         public const float jumpHoldTime = 0.2f;
+        public const float rehealTime = 10.0f;
+        public const float flickerTime = 2.0f;
+        public const float kbMaxVelocity = -2.0f;
+        public const float kbMinXVelocity = 50.0f;
+        public const int maxHealth = 1;
 
         public float jumpHoldTimer = 0f;
         public float walkAnimation = 0f;
+        public float flickerTimer  = 0f;
+        public int health = maxHealth;
+        public float rehealTimer = 0;
+        public int flickerFrame = 0;
 
         public Player(Level level, Vector2 position) :
             base(level, new Vector2(8, 12), position)
         {
         }
 
-        void Die()
+        public Vector2 KnockBackVelocity()
         {
-            level.mainGame.StartDeathSequence();
-            level.mainGame.AddActor(new PlayerCorpse(level, this));
-            deleted = true;
+            Vector2 vel2;
+            vel2 = -velocity * 0.5f;
+            if (velocity.Y > kbMaxVelocity)
+                velocity.Y = kbMaxVelocity;
+
+            if (Math.Abs(vel2.X) < kbMinXVelocity)
+            {
+                if (vel2.X != 0)
+                    vel2.X = Math.Sign(velocity.X) * kbMinXVelocity;
+                else
+                    vel2.X = (facingLeft ? 1 : -1) * kbMinXVelocity;
+            }
+
+            return vel2;
+        }
+
+        void TakeDamage()
+        {
+            if (flickerTimer > 0)
+                // invincible for a bit
+                return;
+            
+            health--;
+
+            if (health <= 0)
+            {
+                level.mainGame.StartDeathSequence();
+                level.mainGame.AddActor(new PlayerCorpse(level, this));
+                deleted = true;
+                flickerFrame = 0;
+            }
+            else
+            {
+                rehealTimer = rehealTime;
+                flickerTimer = flickerTime;
+                velocity = KnockBackVelocity();
+                flickerFrame = 0;
+            }
         }
 
         void ProcessHorizontalInputs(MainGame mg, GameTime gameTime)
@@ -131,7 +176,7 @@ namespace JeffJamGame
             {
                 if (CollideX(tilePos, actorPosition, Math.Sign(velocity.X)))
                 {
-                    Die();
+                    TakeDamage();
                     return true;
                 }
                 else return false;
@@ -156,7 +201,7 @@ namespace JeffJamGame
             {
                 if (CollideY(tilePos, actorPosition, Math.Sign(velocity.Y)))
                 {
-                    Die();
+                    TakeDamage();
                     return true;
                 }
                 else return false;
@@ -222,10 +267,21 @@ namespace JeffJamGame
             HandleGravity(mg, gameTime);
             HandleFacing(mg);
             base.Update(mg, gameTime);
+
+            if (Hax.Timer(ref flickerTimer, gameTime) == eTimerState.Running)
+                flickerFrame++;
+            else
+                flickerFrame = 0;
+
+            if (Hax.Timer(ref rehealTimer, gameTime) == eTimerState.Finished)
+                health = Math.Max(health, maxHealth);
         }
 
         public override Point GetFrameInActors()
         {
+            if (flickerFrame % 2 != 0)
+                return new Point(7, 7);
+
             if (!isGrounded)
             {
                 walkAnimation = 0;

@@ -152,6 +152,7 @@ namespace JeffJamGame
         }
 
         int prefabY, prefabIndex;
+        bool flipCurrentPrefab;
         Prefab currentPrefab;
 
         public int CameraY { get => cameraY; }
@@ -164,10 +165,11 @@ namespace JeffJamGame
                 // shit, we need to choose.
                 currentPrefab = LevelPrefabs.GetRandomPrefab(random, ref prefabIndex);
                 prefabY = 0;
+                flipCurrentPrefab = random.Next(2) != 0;
             }
 
             // then advance the current prefab
-            level.PlacePrefabSlice(rowToGenerate, prefabY, currentPrefab, ref spawnPointX);
+            level.PlacePrefabSlice(rowToGenerate, prefabY, currentPrefab, ref spawnPointX, flipCurrentPrefab);
             prefabY++;
             return spawnPointX;
         }
