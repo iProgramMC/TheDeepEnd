@@ -15,6 +15,49 @@ namespace TheDeepEnd
     // LevelWidth X 12 prefabs of level.
     public class LevelPrefabs
     {
+        // This special prefab only appears once throughout the game session.
+        public const string Prefab0 =
+            "...S............" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "................" +
+            "............C..." +
+            "................" +
+            "GGGGGGG..GGGGGGG" +
+            "MMMMMMM..MMMMMMM" +
+            "MMMMMMM..MMMMMMM";
+
         public const string Prefab1 =
             "WWWWWWW..WWWWWWW" +
             "Wvvvv#.S.......W" +
@@ -196,6 +239,7 @@ namespace TheDeepEnd
 
         public static Prefab[] Prefabs = new Prefab[]
         {
+            new Prefab { data = Prefab0, height = 40 },
             new Prefab { data = Prefab1, height = 12 },
             new Prefab { data = Prefab2, height = 12 },
             new Prefab { data = Prefab3, height = 14 },
@@ -232,24 +276,30 @@ namespace TheDeepEnd
                 case 'M': return eTileType.Stone;
                 case 'W': return eTileType.WhiteBrick;
                 case '$': return eTileType.Spring;
+                case 'G': return eTileType.GrassStone;
                 default: throw new Exception("unknown character '" + chr + "'!");
             }
         }
 
         public static Prefab GetRandomPrefab(Random r, ref int exclude)
         {
-            if (exclude == -1) exclude = 0;
-            int chosen = (exclude + Prefabs.Length - 1) % Prefabs.Length;
+            int chosen;
+            if (exclude == -1)
+            {
+                // prefab #0 will only appear ONCE in the entire game session.
+                chosen = 0;
+            }
+            else
+            {
+                do
+                {
+                    chosen = r.Next(Prefabs.Length);
+                }
+                while ((chosen == exclude || chosen == 0) && Prefabs.Length > 1);
+            }
+
             exclude = chosen;
-            return Prefabs[chosen]; 
-        
-            //int chosen;
-            //do {
-                //chosen = r.Next(Prefabs.Length);
-            //}
-            //while (chosen == exclude && Prefabs.Length > 1);
-            //exclude = chosen;
-            //return Prefabs[chosen];
+            return Prefabs[chosen];
         }
     }
 }

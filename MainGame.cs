@@ -38,6 +38,9 @@ namespace TheDeepEnd
         Texture2D depth0Layer0Tex, depth0Layer1Tex;
         Texture2D depth1TopTex, depth1Layer0Tex, depth1Layer1Tex, depth1Layer2Tex, depth2TransTex;
         Texture2D perlinNoiseTex;
+        Texture2D controlsTex;
+        Texture2D basketTex;
+        Texture2D statusBarTex;
         SpriteFont font;
         
         public SoundEffect sfx_damage, sfx_jump, sfx_land, sfx_peline, sfx_upgrade, sfx_candy;
@@ -54,6 +57,7 @@ namespace TheDeepEnd
         public const float fadeOutTime = 0.5f;
         public const float fadeInTime = 0.5f;
         public const float deathTime = 1.0f;
+        public const float controlsSlideTime = 0.5f;
 
         public const Keys jumpKey = Keys.Space;
         public const Keys leftKey = Keys.Left;
@@ -68,24 +72,51 @@ namespace TheDeepEnd
 
         bool isGameOverScreenShown = false;
         bool isTitleScreenShown = false;
+        bool isControlsScreenShown = false;
         float gameOverScreenPos = 0f;
         float gameOverScreenVel = 0f;
         float somethingHue = 0f;
         float noiseOffs = 0f;
+        float controlsOffs = 0f;
 
         // PLAYER SCORE
         int maxPlayerY = 0;
+        int score = 0;
         int candy = 0;
 
         // HIGH SCORE
+        int scoreHeight = 0; // temporary value where the maxPlayerY is recorded upon death.
         int highScore = 0;
-        int highCandy = 0;
+        int highHeight = 0;
         bool hasHighScore = false; // does this session have a high score?
-        bool hasHighCandy = false;
+        bool hasHighHeight = false;
 
         public void AddCandy(int cndy)
         {
             candy += cndy;
+            score += cndy * 50;
+        }
+
+        public void AddScore(int scre)
+        {
+            score += scre;
+        }
+
+        void UpdateHighScore()
+        {
+            // Check if there was a new high score
+            if (highScore < score)
+            {
+                highScore = score;
+                hasHighScore = true;
+            }
+
+            scoreHeight = Math.Max((maxPlayerY / tileSize) - 40 - 8, 0); // 40 is the height of the first prefab, 8 for penalty for failing the first part
+            if (highHeight < scoreHeight)
+            {
+                highHeight = scoreHeight;
+                hasHighHeight = true;
+            }
         }
 
         Level level;
@@ -131,6 +162,9 @@ namespace TheDeepEnd
             tilesTex = Hax.LoadTexture2D(GraphicsDevice, "assets/tiles.png");
             actorsTex = Hax.LoadTexture2D(GraphicsDevice, "assets/actors.png");
             gameOverBgTex = Hax.LoadTexture2D(GraphicsDevice, "assets/gameover.png");
+            controlsTex = Hax.LoadTexture2D(GraphicsDevice, "assets/controls.png");
+            basketTex = Hax.LoadTexture2D(GraphicsDevice, "assets/basket.png");
+            statusBarTex = Hax.LoadTexture2D(GraphicsDevice, "assets/status_bar.png");
             perlinNoiseTex = Hax.LoadTexture2D(GraphicsDevice, "assets/overlay.png");
             depth0Layer0Tex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_0_layer_0.png");
             depth0Layer1Tex = Hax.LoadTexture2D(GraphicsDevice, "assets/depth_0_layer_1.png");
@@ -148,8 +182,6 @@ namespace TheDeepEnd
             sfx_peline = Hax.LoadSoundEffect("assets/paline.pcm");
             sfx_upgrade = Hax.LoadSoundEffect("assets/upgrade.pcm");
             sfx_candy = Hax.LoadSoundEffect("assets/candy.pcm");
-
-            ResetEverything();
         }
 
         int actualRowY = 0;
@@ -168,6 +200,10 @@ namespace TheDeepEnd
             maxPlayerY = 0;
             isTitleScreenShown = false;
             actualRowY = 0;
+            candy = 0;
+            score = 0;
+            hasHighHeight = false;
+            hasHighScore = false;
 
             int spawnPointX = -1, spawnPointY = -1;
 
@@ -190,13 +226,7 @@ namespace TheDeepEnd
         public void StartDeathSequence()
         {
             deathTimer = deathTime;
-
-            // Check if there was a new high score
-            if (highScore < maxPlayerY)
-            {
-                highScore = maxPlayerY;
-                hasHighScore = true;
-            }
+            UpdateHighScore();
         }
 
         int prefabY, prefabIndex;
@@ -347,8 +377,18 @@ namespace TheDeepEnd
         {
             if (keyboardState.IsKeyDown(Keys.Enter) && !prevKeyboardState.IsKeyDown(Keys.Enter) && fadeOutTimer == 0)
             {
-                fadeOutTimer = fadeOutTime;
+                if (isControlsScreenShown)
+                {
+                    fadeOutTimer = fadeOutTime;
+                }
+                else
+                {
+                    controlsOffs = controlsSlideTime;
+                    isControlsScreenShown = true;
+                }
             }
+
+            Hax.Timer(ref controlsOffs, gameTime);
         }
 
         /// Allows the game to run logic such as updating the world,
@@ -480,6 +520,24 @@ namespace TheDeepEnd
         void DrawGameOverScreenBG()
         {
             spriteBatch.Draw(gameOverBgTex, new Rectangle(0, (int)gameOverScreenPos, canvasWidth, canvasHeight), Color.White);
+
+            const int basketWidth = 80;
+            int basketY = 140 + (int)gameOverScreenPos;
+            float basketScale = 0.3f;
+            string candyStr = candy.ToString();
+            var msrv = font.MeasureString(candyStr);
+
+            // determine the scale
+            basketScale = Math.Min(0.3f, 40f / msrv.X);
+
+            spriteBatch.Draw(basketTex, new Vector2(canvasWidth / 2 - basketWidth / 2, basketY), Color.White);
+
+            //msr = msrv.X * basketScale;
+            //float textOff = (32 - msrv.Y * basketScale) / 2;
+            //spriteBatch.DrawString(font, "x", new Vector2(canvasWidth / 2 - basketWidth / 2 + 34, basketY + textOff), Color.Black, 0.0f, Vector2.Zero, basketScale, SpriteEffects.None, 0.0f);
+            //spriteBatch.DrawString(font, candyStr, new Vector2(canvasWidth / 2 + basketWidth / 2 - msr, basketY + textOff), Color.Black, 0.0f, Vector2.Zero, basketScale, SpriteEffects.None, 0.0f);
+            //
+            //spriteBatch.DrawString(font, pressEnterStr, new Vector2(canvasWidth / 2 - pressEnterStrSize / 2, w + 180), rgbColor, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
         }
 
         void DrawGameOverScreenText()
@@ -495,19 +553,53 @@ namespace TheDeepEnd
             spriteBatch.DrawString(font, gameOver, new Vector2(canvasWidth / 2 - msr, 40 + w), Color.Black, 0.0f, Vector2.Zero, titleScale, SpriteEffects.None, 0.0f);
 
             const float normalScale = 0.2f;
-            string scoreStr = maxPlayerY.ToString();
-            string highScoreStr = highScore.ToString();
+            string scoreStr = score.ToString("#,###,000,000");
+            string highScoreStr = highScore.ToString("#,###,000,000");
+            
+            string heightStr = scoreHeight.ToString("#,###,###,##0") + " m";
+            string highHeightStr = highHeight.ToString("#,###,###,##0") + " m";
+
             float scoreStrSize = font.MeasureString(scoreStr).X * normalScale;
             float highScoreStrSize = font.MeasureString(highScoreStr).X * normalScale;
+            float heightStrSize = font.MeasureString(heightStr).X * normalScale;
+            float highHeightStrSize = font.MeasureString(highHeightStr).X * normalScale;
             float pressEnterStrSize = font.MeasureString(pressEnterStr).X * normalScale;
 
-            spriteBatch.DrawString(font, "Score: ",      new Vector2(32, w+96),                                   Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
-            spriteBatch.DrawString(font, "High Score: ", new Vector2(32, w+128),                                  Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
-            spriteBatch.DrawString(font, scoreStr,       new Vector2(canvasWidth - 32 - scoreStrSize,     w+96),  Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
-            spriteBatch.DrawString(font, highScoreStr,   new Vector2(canvasWidth - 32 - highScoreStrSize, w+128), Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            const int pad = 64;
+            Color rgbColor = Hax.HSVToRGB(somethingHue, 1.0f, 1.0f);
+            Color scoreColor = hasHighScore ? rgbColor : Color.Black;
+            Color heightColor = hasHighHeight ? rgbColor : Color.Black;
 
-            Color color = Hax.HSVToRGB(somethingHue, 1.0f, 1.0f);
-            spriteBatch.DrawString(font, pressEnterStr, new Vector2(canvasWidth / 2 - pressEnterStrSize / 2, w + 180), color, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            const int top = 80;
+            const int ht = 12;
+
+            spriteBatch.DrawString(font, "Score: ",      new Vector2(pad, w+top+ht*0),                                   Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, "High Score: ", new Vector2(pad, w+top+ht*1),                                   Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, scoreStr,       new Vector2(canvasWidth - pad - scoreStrSize,      w+top+ht*0), scoreColor,  0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, highScoreStr,   new Vector2(canvasWidth - pad - highScoreStrSize,  w+top+ht*1), scoreColor,  0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, "Depth: ",      new Vector2(pad, w+top+ht*2),                                   Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, "Max Depth: ",  new Vector2(pad, w+top+ht*3),                                   Color.Black, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, heightStr,      new Vector2(canvasWidth - pad - heightStrSize,     w+top+ht*2), heightColor, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, highHeightStr,  new Vector2(canvasWidth - pad - highHeightStrSize, w+top+ht*3), heightColor, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+
+            // draw the basket X candy count
+            const int basketWidth = 80;
+            int basketY = 140 + w;
+            float basketScale = 0.3f;
+            string candyStr = candy.ToString();
+            var msrv = font.MeasureString(candyStr);
+
+            // determine the scale
+            basketScale = Math.Min(0.3f, 40f / msrv.X);
+
+            //spriteBatch.Draw(basketTex, new Vector2(canvasWidth / 2 - basketWidth / 2, basketY), Color.White);
+
+            msr = msrv.X * basketScale;
+            float textOff = (32 - msrv.Y * basketScale) / 2;
+            spriteBatch.DrawString(font, "x", new Vector2(canvasWidth / 2 - basketWidth / 2 + 34, basketY + textOff), Color.Black, 0.0f, Vector2.Zero, basketScale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, candyStr, new Vector2(canvasWidth / 2 + basketWidth / 2 - msr, basketY + textOff), Color.Black, 0.0f, Vector2.Zero, basketScale, SpriteEffects.None, 0.0f);
+
+            spriteBatch.DrawString(font, pressEnterStr, new Vector2(canvasWidth / 2 - pressEnterStrSize / 2, w + 180), rgbColor, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
         }
 
         void DrawFades()
@@ -535,6 +627,9 @@ namespace TheDeepEnd
             Color color = Hax.HSVToRGB(somethingHue, 1.0f, 1.0f);
             spriteBatch.DrawString(font, titleStr, new Vector2(canvasWidth / 2 - titleStrSize / 2, 32), color, 0.0f, Vector2.Zero, titleScale, SpriteEffects.None, 0.0f);
             spriteBatch.DrawString(font, pressEnterStr, new Vector2(canvasWidth / 2 - pressEnterStrSize / 2, canvasHeight / 2), Color.White, 0.0f, Vector2.Zero, normalScale, SpriteEffects.None, 0.0f);
+
+            if (isControlsScreenShown)
+                spriteBatch.Draw(controlsTex, new Rectangle((int)(canvasWidth * Hax.Smoothstep(2f * controlsOffs)), 0, canvasWidth, canvasHeight), Color.White);
         }
 
         Color GetBGColor()
@@ -591,6 +686,29 @@ namespace TheDeepEnd
             DrawDepth2Background(-cameraY);
         }
 
+        void DrawStatusBar()
+        {
+            spriteBatch.Draw(statusBarTex, new Rectangle(0, canvasHeight - 10, canvasWidth, 10), Color.White);
+
+            // draw the actual things
+            const float scale = 0.15f;
+            const int off = canvasHeight - 10;
+            float height = font.MeasureString("Wp").Y * scale;
+            float otheroff = off + (10 - height) / 2;
+
+            spriteBatch.DrawString(font, candy.ToString("#,###,###,##0"), new Vector2(18, otheroff), Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0.0f);
+
+            Player player = null;
+            foreach (var actor in actors)
+                if (actor is Player) player = actor as Player;
+
+            if (player != null) {
+                spriteBatch.DrawString(font, player.health.ToString(), new Vector2(80, otheroff), Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0.0f);
+            }
+
+            spriteBatch.DrawString(font, score.ToString("#,###,000,000"), new Vector2(168, otheroff), Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0.0f);
+        }
+
         /// This is called when the game should draw itself.
         /// param gameTime Provides a snapshot of timing values.
         protected override void Draw(GameTime gameTime)
@@ -609,6 +727,7 @@ namespace TheDeepEnd
                 DrawBackground();
                 DrawLevel();
                 DrawActors();
+                DrawStatusBar();
             }
 
             spriteBatch.End();

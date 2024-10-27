@@ -17,6 +17,7 @@ namespace TheDeepEnd
         {
             base.Collect(player);
             player.health++;
+            level.mainGame.AddScore(1000);
             level.mainGame.sfx_upgrade.Play();
         }
 

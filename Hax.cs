@@ -157,5 +157,10 @@ namespace TheDeepEnd
 
             return Color.FromNonPremultiplied(rOut, gOut, bOut, 255);
         }
+
+        public static float Smoothstep(float x)
+        {
+            return x * x * (3 - 2 * x);
+        }
     }
 }

@@ -16,8 +16,8 @@ namespace TheDeepEnd
         public override void Collect(Player player)
         {
             base.Collect(player);
-
             player.doubleJumpEnabled = true;
+            level.mainGame.AddScore(2000);
             level.mainGame.sfx_upgrade.Play();
         }
 

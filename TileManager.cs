@@ -36,6 +36,7 @@ namespace TheDeepEnd
         Stone,
         WhiteBrick,
         Spring,
+        GrassStone,
     }
     public static class TileManager
     {
@@ -52,6 +53,7 @@ namespace TheDeepEnd
             new TileInfo { texX = 1, texY = 1, collisionType = eCollisionType.Solid }, // STONE
             new TileInfo { texX = 2, texY = 1, collisionType = eCollisionType.Solid }, // WHITE BRICK
             new TileInfo { texX = 0, texY = 2, collisionType = eCollisionType.Spring }, // WHITE BRICK
+            new TileInfo { texX = 5, texY = 1, collisionType = eCollisionType.Solid }, // GRASS STONE
         };
 
         public static TileInfo GetTileInfo(eTileType tt)
