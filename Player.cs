@@ -31,6 +31,8 @@ namespace JeffJamGame
         public int health = maxHealth;
         public float rehealTimer = 0;
         public int flickerFrame = 0;
+        public bool doubleJumpEnabled = false;
+        public bool isSecondJumpAvailable = false;
 
         public Player(Level level, Vector2 position) :
             base(level, new Vector2(8, 12), position)
@@ -63,7 +65,12 @@ namespace JeffJamGame
 
             level.mainGame.sfx_damage.Play();
 
-            health--;
+            if (doubleJumpEnabled) { 
+                doubleJumpEnabled = false;
+                level.mainGame.AddActor(new BroomStickWearOff(level, this));
+            } else {
+                health--;
+            }
 
             if (health <= 0)
             {
@@ -95,8 +102,11 @@ namespace JeffJamGame
 
         void ProcessJumpKey(MainGame mg)
         {
-            if ((isGrounded || jumpForgivenessTimer > 0) && mg.JumpPressed())
+            bool jumpPressed = mg.JumpPressed();
+            if ((isGrounded || jumpForgivenessTimer > 0 || isSecondJumpAvailable) && jumpPressed)
             {
+                isSecondJumpAvailable = doubleJumpEnabled && (isGrounded || jumpForgivenessTimer > 0);
+
                 mg.ConsumeJumpBuffer();
                 isGrounded = false;
                 velocity.Y = jumpSpeed;

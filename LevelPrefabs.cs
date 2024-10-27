@@ -19,7 +19,7 @@ namespace JeffJamGame
             "WWWWWWW..WWWWWWW" +
             "Wvvvv#.S.......W" +
             "W....#####.....W" +
-            "W..............W" +
+            "W.........N....W" +
             "W.T#T.##..T.^^^W" +
             "W.<#>..#^^^^###W" +
             "W..#...#####...W" +
@@ -79,8 +79,9 @@ namespace JeffJamGame
         {
             switch (chr)
             {
-                case '.':
-                case 'S': return eTileType.None;
+                case 'N': // Broom Stick Spawner
+                case 'S': // Player Spawn
+                case '.': return eTileType.None;
                 case '#': return eTileType.Block;
                 case 'T': return eTileType.JumpThrough;
                 case '^': return eTileType.Deadly_UP;

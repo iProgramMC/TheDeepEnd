@@ -83,6 +83,8 @@ namespace JeffJamGame
         Level level;
         List<Actor> actors = new List<Actor>();
 
+        public List<Actor> Actors { get { return actors; } }
+
         KeyboardState keyboardState, prevKeyboardState;
 
         public MainGame()
@@ -97,6 +99,8 @@ namespace JeffJamGame
 
             graphics.PreferredBackBufferWidth = (int)(canvasWidth * startScale);
             graphics.PreferredBackBufferHeight = (int)(canvasHeight * startScale);
+
+            Window.Title = "The Deep End";
         }
 
         protected override void Initialize()
@@ -138,6 +142,8 @@ namespace JeffJamGame
             ResetEverything();
         }
 
+        int actualRowY = 0;
+
         void ResetEverything()
         {
             actors.Clear();
@@ -151,12 +157,13 @@ namespace JeffJamGame
             isGameOverScreenShown = false;
             maxPlayerY = 0;
             isTitleScreenShown = false;
+            actualRowY = 0;
 
             int spawnPointX = -1, spawnPointY = -1;
 
             for (int y = 0; y < levelHeight * 2; y++)
             {
-                int spX = GenerateRow(y);
+                int spX = GenerateRow(y, actualRowY++);
                 if (spX >= 0 && spawnPointX < 0)
                 {
                     spawnPointX = spX;
@@ -188,7 +195,7 @@ namespace JeffJamGame
 
         public int CameraY { get => cameraY; }
 
-        int GenerateRow(int rowToGenerate)
+        int GenerateRow(int rowToGenerate, int actualRowY)
         {
             int spawnPointX = 0;
             if (prefabY == currentPrefab.height)
@@ -200,7 +207,7 @@ namespace JeffJamGame
             }
 
             // then advance the current prefab
-            level.PlacePrefabSlice(rowToGenerate, prefabY, currentPrefab, ref spawnPointX, flipCurrentPrefab);
+            level.PlacePrefabSlice(rowToGenerate, prefabY, currentPrefab, ref spawnPointX, flipCurrentPrefab, actualRowY);
             prefabY++;
             return spawnPointX;
         }
@@ -216,7 +223,13 @@ namespace JeffJamGame
             {
                 int rowToRegen = (oldCameraY / tileSize) % (levelHeight * 2);
 
-                GenerateRow(rowToRegen);
+                foreach (var actor in actors)
+                {
+                    if ((int)(actor.position.Y + actor.hitBoxSize.Y - cameraY) < 0)
+                        actor.deleted = true;
+                }
+
+                GenerateRow(rowToRegen, actualRowY++);
             }
         }
 
@@ -252,6 +265,17 @@ namespace JeffJamGame
 
             if (noiseOffs > 512)
                 noiseOffs -= 512;
+
+            if (keyboardState.IsKeyDown(jumpKey) && !prevKeyboardState.IsKeyDown(jumpKey))
+            {
+                spacePressedTimer = 0.1f;
+            }
+            else
+            {
+                spacePressedTimer -= Hax.Elapsed(gameTime);
+                if (spacePressedTimer < 0)
+                    spacePressedTimer = 0;
+            }
 
             if (Hax.Timer(ref deathTimer, gameTime) == eTimerState.Finished)
             {
@@ -307,17 +331,6 @@ namespace JeffJamGame
             }
 
             level.UpdateSpecialEffects(gameTime);
-
-            if (keyboardState.IsKeyDown(jumpKey) && !prevKeyboardState.IsKeyDown(jumpKey))
-            {
-                spacePressedTimer = 0.1f;
-            }
-            else
-            {
-                spacePressedTimer -= Hax.Elapsed(gameTime);
-                if (spacePressedTimer < 0)
-                    spacePressedTimer = 0;
-            }
         }
 
         void UpdateTitle(GameTime gameTime)
@@ -395,10 +408,31 @@ namespace JeffJamGame
             }
         }
 
+        readonly int[] actorTable = new int[] { 3, 3, 2, 3, 4, 3, 3, 2 };
         void DrawActor(Actor actor)
         {
             Point frame = actor.GetFrameInActors();
             Vector2 vec = actor.position - new Vector2((tileSize - actor.hitBoxSize.X) / 2, tileSize - actor.hitBoxSize.Y + cameraY);
+
+            Player player = null;
+            if (actor is Player)
+                player = actor as Player;
+
+            if (!(player is null) && player.doubleJumpEnabled)
+            {
+                spriteBatch.Draw(
+                    actorsTex,
+                    vec + new Vector2(0, actorTable[frame.X]),
+                    new Rectangle(1 * tileSize, 2 * tileSize, tileSize, tileSize),
+                    Color.White,
+                    0.0f,
+                    Vector2.Zero,
+                    1.0f,
+                    actor.facingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                    0.0f
+                );
+            }
+
             spriteBatch.Draw(
                 actorsTex,
                 vec,

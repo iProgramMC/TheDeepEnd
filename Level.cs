@@ -12,6 +12,7 @@ namespace JeffJamGame
     {
         public const int levelWidth = MainGame.levelWidth;
         public const int levelHeight = MainGame.levelHeight;
+        public const int tileSize = MainGame.tileSize;
         public const float springSpecialEffectTime = 1.0f;
 
         // access: tiles[X, Y]
@@ -46,27 +47,12 @@ namespace JeffJamGame
             }
         }
 
-        public void PlacePrefab(int y, string prefab)
-        {
-            int height = prefab.Length / levelWidth;
-            Debug.Assert(prefab.Length % levelWidth == 0);
-
-            int i = 0;
-            for (int yo = 0; yo < height; yo++)
-            {
-                for (int xo = 0; xo < levelWidth; xo++)
-                    SetTile(xo, y + yo, LevelPrefabs.CharToTileType(prefab[i++]));
-            }
-        }
-
-        public void PlacePrefabSlice(int y, int ySliceOfPrefab, Prefab prefab, ref int spawnPointX, bool flipHorizontally)
+        public void PlacePrefabSlice(int y, int ySliceOfPrefab, Prefab prefab, ref int spawnPointX, bool flipHorizontally, int actualRowY)
         {
             spawnPointX = -1;
             for (int xo = 0; xo < levelWidth; xo++)
             {
                 char chr = prefab.data[ySliceOfPrefab * levelWidth + xo];
-                if (chr == 'S') spawnPointX = xo;
-
                 int dx = xo;
                 if (flipHorizontally)
                 {
@@ -75,7 +61,25 @@ namespace JeffJamGame
                     else if (chr == '<') chr = '>';
                 }
 
-                SetTile(dx, y, LevelPrefabs.CharToTileType(chr));
+                int entY = actualRowY * tileSize;
+
+                char chro = '.';
+                switch (chr)
+                {
+                    case 'S':
+                        spawnPointX = dx;
+                        break;
+
+                    case 'N':
+                        mainGame.AddActor(new BroomStick(this, new Vector2(dx * tileSize, entY)));
+                        break;
+
+                    default:
+                        chro = chr;
+                        break;
+                }
+
+                SetTile(dx, y, LevelPrefabs.CharToTileType(chro));
             }
         }
 

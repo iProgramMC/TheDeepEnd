@@ -53,10 +53,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actor.cs" />
+    <Compile Include="BroomStick.cs" />
+    <Compile Include="Collectable.cs" />
     <Compile Include="Hax.cs" />
     <Compile Include="LevelPrefabs.cs" />
     <Compile Include="MainGame.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="BroomStickWearOff.cs" />
     <Compile Include="PlayerCorpse.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
