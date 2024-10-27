@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace JeffJamGame
+namespace TheDeepEnd
 {
     internal class Program
     {

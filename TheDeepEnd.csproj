@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{DE46BE09-5E0F-4AF0-A3EE-456D818F1302}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>JeffJamGame</RootNamespace>
-    <AssemblyName>JeffJamGame</AssemblyName>
+    <RootNamespace>TheDeepEnd</RootNamespace>
+    <AssemblyName>TheDeepEnd</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -35,7 +35,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>JeffJamGame.Program</StartupObject>
+    <StartupObject>TheDeepEnd.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework">
@@ -63,6 +63,7 @@
     <Compile Include="PlayerCorpse.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Pumpkin.cs" />
     <Compile Include="TileManager.cs" />
   </ItemGroup>
   <ItemGroup>

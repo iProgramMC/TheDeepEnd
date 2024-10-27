@@ -6,7 +6,7 @@ using System.Net.Configuration;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JeffJamGame
+namespace TheDeepEnd
 {
     public class Actor
     {

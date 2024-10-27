@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JeffJamGame
+namespace TheDeepEnd
 {
     public struct Prefab
     {
@@ -19,7 +19,7 @@ namespace JeffJamGame
             "WWWWWWW..WWWWWWW" +
             "Wvvvv#.S.......W" +
             "W....#####.....W" +
-            "W.........N....W" +
+            "W..............W" +
             "W.T#T.##..T.^^^W" +
             "W.<#>..#^^^^###W" +
             "W..#...#####...W" +
@@ -38,8 +38,8 @@ namespace JeffJamGame
             "B.TTT.^^^^.TTT.B" +
             "B^^^..####..^^^B" +
             "B###.T####T.###B" +
-            "BBB..<####>..BBB" +
-            "BBB....vv....BBB" +
+            "BBB..<####>..P.B" +
+            "BBB....vv......B" +
             "BMMMMM....MMMMMB";
         public const string Prefab3 =
             "BMMMMMM..MMMMMMB" +
@@ -62,8 +62,8 @@ namespace JeffJamGame
             "M..^..MMMMM..<MM" +
             "M..M$....v...<MM" +
             "M..MMMMM...MMMMM" +
-            "M...v..MMMMMMMMM" +
-            "M.........MMMMMM" +
+            "M...v..MMMMM.N.M" +
+            "M..............M" +
             "M...$.....MMMMMM" +
             "MMMMMMM..MMMMMMM";
 
@@ -80,6 +80,7 @@ namespace JeffJamGame
             switch (chr)
             {
                 case 'N': // Broom Stick Spawner
+                case 'P': // Pumpkin Spawner
                 case 'S': // Player Spawn
                 case '.': return eTileType.None;
                 case '#': return eTileType.Block;

@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace JeffJamGame
+namespace TheDeepEnd
 {
     /*
      * Description
@@ -41,7 +41,7 @@ namespace JeffJamGame
         Texture2D perlinNoiseTex;
         SpriteFont font;
         
-        public SoundEffect sfx_damage, sfx_jump, sfx_land, sfx_peline;
+        public SoundEffect sfx_damage, sfx_jump, sfx_land, sfx_peline, sfx_upgrade;
 
         public const int canvasWidth = 256;
         public const int canvasHeight = 240;
@@ -138,6 +138,7 @@ namespace JeffJamGame
             sfx_jump = Hax.LoadSoundEffect("assets/jump.pcm");
             sfx_land = Hax.LoadSoundEffect("assets/land.pcm");
             sfx_peline = Hax.LoadSoundEffect("assets/paline.pcm");
+            sfx_upgrade = Hax.LoadSoundEffect("assets/upgrade.pcm");
 
             ResetEverything();
         }
@@ -444,6 +445,21 @@ namespace JeffJamGame
                 actor.facingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
                 0.0f
             );
+
+            if (!(player is null) && player.health > 1)
+            {
+                spriteBatch.Draw(
+                    actorsTex,
+                    vec,
+                    new Rectangle(frame.X * tileSize, (frame.Y + 1) * tileSize, tileSize, tileSize),
+                    Color.White,
+                    0.0f,
+                    Vector2.Zero,
+                    1.0f,
+                    actor.facingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                    0.0f
+                );
+            }
         }
 
         void DrawActors()
@@ -589,14 +605,17 @@ namespace JeffJamGame
             spriteBatch.End();
 
             // LINEAR WRAP, SCALED, ADDITIVE
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, null, null, null, scaleMatrix * translateMatrix);
-            spriteBatch.Draw(
-                perlinNoiseTex,
-                new Vector2(-(noiseOffs % 1), -(noiseOffs % 1)),
-                new Rectangle((int)noiseOffs, (int)(noiseOffs + cameraY / 2) % 512, canvasWidth + 1, canvasHeight + 1),
-                Color.FromNonPremultiplied(255, 255, 255, 100)
-            );
-            spriteBatch.End();
+            if (!isTitleScreenShown)
+            {
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, null, null, null, scaleMatrix * translateMatrix);
+                spriteBatch.Draw(
+                    perlinNoiseTex,
+                    new Vector2(-(noiseOffs % 1), -(noiseOffs % 1)),
+                    new Rectangle((int)noiseOffs, (int)(noiseOffs + cameraY / 2) % 512, canvasWidth + 1, canvasHeight + 1),
+                    Color.FromNonPremultiplied(255, 255, 255, 100)
+                );
+                spriteBatch.End();
+            }
 
             // POINT CLAMP, SCALED
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null, scaleMatrix * translateMatrix);

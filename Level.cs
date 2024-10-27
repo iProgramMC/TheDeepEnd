@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JeffJamGame
+namespace TheDeepEnd
 {
     public class Level
     {
@@ -71,7 +71,11 @@ namespace JeffJamGame
                         break;
 
                     case 'N':
-                        mainGame.AddActor(new BroomStick(this, new Vector2(dx * tileSize, entY)));
+                        mainGame.AddActor(new BroomStick(this, new Vector2(dx * tileSize + 4, entY + 8)));
+                        break;
+
+                    case 'P':
+                        mainGame.AddActor(new Pumpkin(this, new Vector2(dx * tileSize + 4, entY + 8)));
                         break;
 
                     default:

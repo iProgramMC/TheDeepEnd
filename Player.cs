@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace JeffJamGame
+namespace TheDeepEnd
 {
     public class Player : Actor
     {
