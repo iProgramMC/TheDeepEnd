@@ -45,21 +45,23 @@ namespace JeffJamGame
             "BMMMMMM..MMMMMMB" +
             "B>.......#.....B" +
             "B>..$..S.#..^..B" +
-            "B>..######T###.B" +
-            "B>.....vv..###.B" +
-            "B>........$###.B" +
-            "B###^^########.B" +
-            "B..####........B" +
+            "B>..######TWWW.B" +
+            "B>.....vv..WWW.B" +
+            "B>........$WWW.B" +
+            "BWWW^^WWWWWWWW.B" +
+            "Bv#####vv......B" +
             "B..............B" +
-            "B..............B" +
-            "B..............B" +
+            "B...^.......^..B" +
+            "B...#######.W.TB" +
+            "B.........#.W..B" +
+            "B.........#^W^^B" +
             "BMMMMM....MMMMMB";
 
         public static Prefab[] Prefabs = new Prefab[]
         {
             new Prefab { data = Prefab1, height = 12 },
             new Prefab { data = Prefab2, height = 12 },
-            new Prefab { data = Prefab3, height = 12 },
+            new Prefab { data = Prefab3, height = 14 },
         };
 
         public static eTileType CharToTileType(char chr)

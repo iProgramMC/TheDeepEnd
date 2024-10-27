@@ -62,29 +62,95 @@ namespace JeffJamGame
             CheckTilesInRect(ref tileCollisions, rect);
         }
 
+        public Rectangle CollisionRect(Vector2 actorPosition)
+        {
+            return new Rectangle(
+                (int)actorPosition.X,
+                (int)actorPosition.Y,
+                (int)hitBoxSize.X,
+                (int)hitBoxSize.Y
+            );
+        }
+
         public bool CollideX(Point tilePosition, Vector2 actorPosition, int moveUnit)
         {
             eTileType tt = level.GetTile(tilePosition.X, tilePosition.Y);
             TileInfo ti = TileManager.GetTileInfo(tt);
 
-            if (ti.collisionType == eCollisionType.None || ti.collisionType == eCollisionType.Spring || ti.collisionType == eCollisionType.JumpThrough)
-                return false;
+            switch (ti.collisionType)
+            {
+                case eCollisionType.None:
+                case eCollisionType.Spring:
+                case eCollisionType.JumpThrough:
+                    return false;
+                    
+                case eCollisionType.DeadlyUp:
+                    return CollisionRect(actorPosition).Intersects(QDLRect(tilePosition)) ||
+                           CollisionRect(actorPosition).Intersects(QDRRect(tilePosition));
 
-            return true;
+                case eCollisionType.DeadlyDown:
+                    return CollisionRect(actorPosition).Intersects(QULRect(tilePosition)) ||
+                           CollisionRect(actorPosition).Intersects(QURRect(tilePosition));
+
+                case eCollisionType.DeadlyLeft:
+                    return CollisionRect(actorPosition).Intersects(QDRRect(tilePosition)) ||
+                           CollisionRect(actorPosition).Intersects(QURRect(tilePosition));
+
+                case eCollisionType.DeadlyRight:
+                    return CollisionRect(actorPosition).Intersects(QULRect(tilePosition)) ||
+                           CollisionRect(actorPosition).Intersects(QDLRect(tilePosition));
+
+                case eCollisionType.Solid:
+                case eCollisionType.Deadly:
+                    return true;
+
+                default:
+                    throw new Exception("unknown collision type !");
+            }
         }
+
+        public Rectangle QULRect(Point tp) => new Rectangle(tp.X * tileSize, tp.Y * tileSize, tileSize / 2, tileSize / 2);
+        public Rectangle QURRect(Point tp) => new Rectangle(tp.X * tileSize + tileSize / 2, tp.Y * tileSize, tileSize / 2, tileSize / 2);
+        public Rectangle QDLRect(Point tp) => new Rectangle(tp.X * tileSize, tp.Y * tileSize + tileSize / 2, tileSize / 2, tileSize / 2);
+        public Rectangle QDRRect(Point tp) => new Rectangle(tp.X * tileSize + tileSize / 2, tp.Y * tileSize + tileSize / 2, tileSize / 2, tileSize / 2);
 
         public bool CollideY(Point tilePosition, Vector2 actorPosition, int moveUnit)
         {
             eTileType tt = level.GetTile(tilePosition.X, tilePosition.Y);
             TileInfo ti = TileManager.GetTileInfo(tt);
 
-            if (ti.collisionType == eCollisionType.None || ti.collisionType == eCollisionType.Spring)
-                return false;
+            switch (ti.collisionType)
+            {
+                case eCollisionType.None:
+                case eCollisionType.Spring:
+                    return false;
 
-            if (ti.collisionType == eCollisionType.JumpThrough)
-                return moveUnit > 0 && (actorPosition.Y + hitBoxSize.Y < tilePosition.Y * tileSize + jumpThroughSize);
+                case eCollisionType.JumpThrough:
+                    return moveUnit > 0 && (actorPosition.Y + hitBoxSize.Y < tilePosition.Y * tileSize + jumpThroughSize);
 
-            return true;
+                case eCollisionType.DeadlyUp:
+                    return CollisionRect(actorPosition).Intersects(QDLRect(tilePosition)) ||
+                           CollisionRect(actorPosition).Intersects(QDRRect(tilePosition));
+
+                case eCollisionType.DeadlyDown:
+                    return CollisionRect(actorPosition).Intersects(QULRect(tilePosition)) ||
+                           CollisionRect(actorPosition).Intersects(QURRect(tilePosition));
+
+                case eCollisionType.DeadlyLeft:
+                    return CollisionRect(actorPosition).Intersects(QDRRect(tilePosition)) ||
+                           CollisionRect(actorPosition).Intersects(QURRect(tilePosition));
+
+                case eCollisionType.DeadlyRight:
+                    return CollisionRect(actorPosition).Intersects(QULRect(tilePosition)) ||
+                           CollisionRect(actorPosition).Intersects(QDLRect(tilePosition));
+
+                case eCollisionType.Solid:
+                case eCollisionType.Deadly:
+                    return true;
+
+                default:
+                    throw new Exception("unknown collision type !");
+            }
         }
 
         public void Move(Vector2 by)

@@ -119,7 +119,7 @@ namespace JeffJamGame
             else return false;
         }
 
-        bool OnTileTouchedHorizontally(Point tilePos)
+        bool OnTileTouchedHorizontally(Point tilePos, Vector2 actorPosition)
         {
             eTileType tt = level.GetTile(tilePos.X, tilePos.Y);
             TileInfo ti = TileManager.GetTileInfo(tt);
@@ -127,10 +127,14 @@ namespace JeffJamGame
                 ti.collisionType == eCollisionType.JumpThrough)
                 return false;
 
-            if (ti.collisionType == eCollisionType.Deadly)
+            if (Hax.IsDeadly(ti.collisionType))
             {
-                Die();
-                return true;
+                if (CollideX(tilePos, actorPosition, Math.Sign(velocity.X)))
+                {
+                    Die();
+                    return true;
+                }
+                else return false;
             }
 
             if (ti.collisionType == eCollisionType.Spring)
@@ -140,7 +144,7 @@ namespace JeffJamGame
             return false;
         }
 
-        bool OnTileTouchedVertically(Point tilePos)
+        bool OnTileTouchedVertically(Point tilePos, Vector2 actorPosition)
         {
             eTileType tt = level.GetTile(tilePos.X, tilePos.Y);
             TileInfo ti = TileManager.GetTileInfo(tt);
@@ -148,10 +152,14 @@ namespace JeffJamGame
                 ti.collisionType == eCollisionType.JumpThrough)
                 return false;
 
-            if (ti.collisionType == eCollisionType.Deadly)
+            if (Hax.IsDeadly(ti.collisionType))
             {
-                Die();
-                return true;
+                if (CollideY(tilePos, actorPosition, Math.Sign(velocity.Y)))
+                {
+                    Die();
+                    return true;
+                }
+                else return false;
             }
 
             if (ti.collisionType == eCollisionType.Spring)
@@ -164,19 +172,24 @@ namespace JeffJamGame
 
         void ProcessTilesWereTouching(GameTime gt)
         {
-            //Horizontal Check
             List<Point> tileCollisions = new List<Point>();
-            CheckTilesInRect(ref tileCollisions, new Rectangle(
-                (int)(position.X + Math.Floor(subPixelMemory.X + velocity.X * Hax.Elapsed(gt))),
-                (int) position.Y,
-                (int) hitBoxSize.X,
-                (int) hitBoxSize.Y - 1
-            ));
 
-            for (int i = 0; i < tileCollisions.Count; i++)
+            //Horizontal Check
+            if (Math.Sign(velocity.X) != 0)
             {
-                if (OnTileTouchedHorizontally(tileCollisions[i]))
-                    break;
+                float newX = (position.X + (float) Math.Floor(subPixelMemory.X + velocity.X * Hax.Elapsed(gt)));
+                CheckTilesInRect(ref tileCollisions, new Rectangle(
+                    (int)newX,
+                    (int)position.Y,
+                    (int)hitBoxSize.X,
+                    (int)hitBoxSize.Y - 1
+                ));
+
+                for (int i = 0; i < tileCollisions.Count; i++)
+                {
+                    if (OnTileTouchedHorizontally(tileCollisions[i], new Vector2(newX, position.Y)))
+                        break;
+                }
             }
 
             //Vertical Check
@@ -195,7 +208,7 @@ namespace JeffJamGame
 
             for (int i = 0; i < tileCollisions.Count; i++)
             {
-                if (OnTileTouchedVertically(tileCollisions[i]))
+                if (OnTileTouchedVertically(tileCollisions[i], new Vector2(position.X, newY)))
                     break;
             }
         }

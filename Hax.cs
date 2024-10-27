@@ -52,5 +52,20 @@ namespace JeffJamGame
                     outDest = target;
             }
         }
+
+        public static bool IsDeadly(eCollisionType ct)
+        {
+            switch (ct)
+            {
+                case eCollisionType.Deadly:
+                case eCollisionType.DeadlyUp:
+                case eCollisionType.DeadlyDown:
+                case eCollisionType.DeadlyLeft:
+                case eCollisionType.DeadlyRight:
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

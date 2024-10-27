@@ -13,6 +13,10 @@ namespace JeffJamGame
         Deadly,
         JumpThrough,
         Spring,
+        DeadlyUp,
+        DeadlyDown,
+        DeadlyLeft,
+        DeadlyRight,
     }
     public class TileInfo
     {
@@ -39,10 +43,10 @@ namespace JeffJamGame
         {
             new TileInfo { texX = 0, texY = 0, collisionType = eCollisionType.None }, // BLANK
             new TileInfo { texX = 0, texY = 0, collisionType = eCollisionType.Solid }, // SOLID
-            new TileInfo { texX = 1, texY = 0, collisionType = eCollisionType.Deadly }, // DEADLY UP
-            new TileInfo { texX = 2, texY = 0, collisionType = eCollisionType.Deadly }, // DEADLY RIGHT
-            new TileInfo { texX = 3, texY = 0, collisionType = eCollisionType.Deadly }, // DEADLY LEFT
-            new TileInfo { texX = 4, texY = 0, collisionType = eCollisionType.Deadly }, // DEADLY DOWN
+            new TileInfo { texX = 1, texY = 0, collisionType = eCollisionType.DeadlyUp }, // DEADLY UP
+            new TileInfo { texX = 2, texY = 0, collisionType = eCollisionType.DeadlyRight }, // DEADLY RIGHT
+            new TileInfo { texX = 3, texY = 0, collisionType = eCollisionType.DeadlyLeft }, // DEADLY LEFT
+            new TileInfo { texX = 4, texY = 0, collisionType = eCollisionType.DeadlyDown }, // DEADLY DOWN
             new TileInfo { texX = 5, texY = 0, collisionType = eCollisionType.JumpThrough }, // JUMPTHROUGH
             new TileInfo { texX = 0, texY = 1, collisionType = eCollisionType.Solid }, // BRICK
             new TileInfo { texX = 1, texY = 1, collisionType = eCollisionType.Solid }, // STONE
