@@ -14,6 +14,14 @@ I realize that the initial story is a bit somber. The goal is basically to get a
 
 How far deep can you go?
 
+### Building
+
+You must link with the following DLLs:
+
+- `Microsoft.Xna.Framework.dll` v4.0
+- `Microsoft.Xna.Framework.Game.dll` v4.0
+- `Microsoft.Xna.Framework.Graphics.dll` v4.0
+
 ### Having trouble opening the game?
 
 Perhaps the version of the XNA Framework provided doesn't cut it. Try installing the Microsoft XNA Framework 4.0 Redistributable, deleting the Microsoft.Xna.Framework.X DLLs from this directory, and trying to run the game again.
