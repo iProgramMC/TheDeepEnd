@@ -1,0 +1,1 @@
+Paste these next to the TheDeepEnd.exe executable to play.
